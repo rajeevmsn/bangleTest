@@ -1,0 +1,11 @@
+{
+  "extends": [
+    "naat"
+  ],
+  "env": {
+    "node": false
+  },
+  "parserOptions": {
+    "sourceType": "script"
+  }
+}

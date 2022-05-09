@@ -1,0 +1,91 @@
+* {
+    font-family: sans-serif;
+}
+
+#header>* {
+    float: right;
+}
+
+#content,
+#logo,
+#message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#message {
+    top: 70%;
+    width: 350px;
+    color: #555;
+}
+
+button {
+    margin-top: 1.5rem;
+}
+
+#content {
+    width: 400px;
+    height: 600px;
+    background: #eee;
+}
+
+#logo {
+    top: 25%;
+    font-size: 96px;
+}
+
+button {
+    width: 128px;
+    height: 48px;
+    background: #89c;
+    border: thin solid #999;
+    color: white;
+    font-size: 1.2rem;
+    border-radius: 48px;
+}
+
+button:hover {
+    background: #67a;
+}
+
+#message.connected > #message-connected {
+    display: block;
+}
+#message.connected > #message-disconnected {
+    display: none;
+}
+
+#message:not(.connected) > #message-connected {
+    display: none;
+}
+#message:not(.connected) > #message-disconnected {
+    display: block;
+}
+
+.avatar {
+    fill: grey;
+}
+
+.avatar.connected {
+    fill: #1c1;
+}
+
+/* Styles just to make the bars for X Y and Z look neat */
+.bar {
+    width : 350px;
+    height: 24px;
+    background-color : #D0D0D0;
+    position:relative;
+    display: inline-block;
+  }
+  .bar span {
+    width : 1px;
+    height: 20px;
+    background-color : red;
+    position:absolute;
+    display: inline-block;
+    left: 175px;
+    top: 2px;
+  }

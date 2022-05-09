@@ -1,0 +1,5 @@
+module.exports = {
+  clientId: 'pub_xxx',
+  secretKey: 'sec_xxx',
+  domain: 'http://127.0.0.1:5050'
+};

@@ -1,0 +1,18 @@
+/* eslint-disable camelcase */
+// eslint-disable-next-line no-unused-vars
+const config = {
+  connectOAuth: {
+    name: 'connect',
+    oauth: {
+      version: 2,
+      auth: 'https://connect-project.io/authorize',
+      grant: 'https://connect-project.io/oauth/token',
+      response_type: 'code'
+    },
+    base: 'https://connect-project.io/',
+    get: { me: 'profile' }
+  },
+  clientId: 'pub_xxx',
+  oauthProxy: 'http://localhost:3500/oauthproxy',
+  redirectURI: 'redirect.html'
+};

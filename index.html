@@ -1,0 +1,54 @@
+<html>
+ <head>
+  <title>Bangle.js data to connect</title>
+  <link href="style.css" rel="stylesheet">
+ </head>
+ <body>
+  <div id="header">
+    <!-- <a href="" onclick="signin();">Sign in</a> -->
+    <div id="profile_connect">[]</div>
+  </div>
+  <div id="content">
+    <div id="logo">
+        <svg width="42px" height="42px" transform="scale(3)">
+            <circle class="avatar" r="20px" cx="21px" cy="21px" fill="grey"></circle>
+            <circle r="8px" cx="21px" cy="15px" fill="#eee"></circle>
+            <circle r="15px" cx="21px" cy="40px" fill="#eee"></circle>
+            <circle r="20px" cx="21px" cy="21px" fill="none" stroke="grey" stroke-width="0.5px"></circle>
+        </svg>
+    </div>
+    <div id="message" style="text-align: center;">
+      
+      <div id="message-disconnected">
+        You are currently not sharing data with Connect.
+        Click the button to start sharing annonymous usage data.
+        (You can stop sharing any time)<br />
+        
+        <button id="connect" onclick="connect()">
+          Connect
+        </button>
+      </div>
+      <div id="message-connected">
+        You are currently sharing data with Connect.<br />
+        To stop sharing, <a href="" onclick="disconnect()">disconnect</a>.</br>
+        
+        <button id="send-data" onclick="sendData()">
+           Send Data
+        </button>
+        <button id="get-data" onclick="getData()">
+            Get Data
+        </button>
+      </div>
+      <button id="btConnect">Bangle Connect</button>
+      <p>X: <span class="bar"><span id="barX"></span></span></p>
+      <p>Y: <span class="bar"><span id="barY"></span></span></p>
+      <p>Z: <span class="bar"><span id="barZ"></span></span></p>
+    </div>
+    </div>
+
+<script src="https://www.puck-js.com/puck.js"></script>
+<script src="./node_modules/hellojs/dist/hello.js"></script>
+<script src="./config-client.js"></script>
+<script src = "./index.js"></script>
+</body>
+</html>
