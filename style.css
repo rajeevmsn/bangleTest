@@ -32,7 +32,7 @@ button {
 }
 
 #logo {
-    top: 25%;
+    top: 40%;
     font-size: 96px;
 }
 
@@ -71,21 +71,3 @@ button:hover {
 .avatar.connected {
     fill: #1c1;
 }
-
-/* Styles just to make the bars for X Y and Z look neat */
-.bar {
-    width : 350px;
-    height: 24px;
-    background-color : #D0D0D0;
-    position:relative;
-    display: inline-block;
-  }
-  .bar span {
-    width : 1px;
-    height: 20px;
-    background-color : red;
-    position:absolute;
-    display: inline-block;
-    left: 175px;
-    top: 2px;
-  }

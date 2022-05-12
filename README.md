@@ -4,3 +4,5 @@ Main object is to make an app with follwoing features.
 1. Connect to bangle with bluetooth
 2. Connect to connect platform
 3. Send data to connect platfrom
+
+NOTE: Make sure your browser support web bluetooth
