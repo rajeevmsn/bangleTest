@@ -6,7 +6,7 @@
 
 let response;
 
-// ro obtain acceleormeter data Bangle.js check https://banglejs.com/reference#t_l_Bangle_accel
+// to obtain acceleormeter data Bangle.js check https://banglejs.com/reference#t_l_Bangle_accel
 const BANGLE_ACC_CODE = `
 Bangle.on('accel',function(a) {
   var d = [
@@ -20,18 +20,36 @@ Bangle.on('accel',function(a) {
   Bluetooth.println(d.join(","));
 })
 `;
+//to o obtain magnetometer data Bangle.js check https://banglejs.com/reference#l_Bangle_mag
+const BANGLE_MAG_CODE = `
+Bangle.setCompassPower(1)
+Bangle.on('mag',function(mag) {
+  var m = [
+    "Mag",
+    mag.x,
+    mag.y,
+    mag.z,
+    mag.dx,
+    mag.dy,
+    mag.dz,
+    mag.heading
+    ];
+  Bluetooth.println(m.join(","));
+})
+`;
+
 //to obtain HRM from Bangle.js check https://banglejs.com/reference#l_Bangle_HRM-raw
 const BANGLE_HRM_CODE = `
 Bangle.setHRMPower(1)
 Bangle.on('HRM-raw', function(hrm){
-  var b = [
+  var hrmRaw = [
     "HRM:",
     hrm.raw,
     hrm.filt,
     hrm.bpm,
     hrm.confidence
   ];
-  Bluetooth.println(b.join(","))
+  Bluetooth.println(hrmRaw.join(","));
 })
 `;
 
@@ -179,7 +197,7 @@ document.getElementById('btConnect').addEventListener('click', function() {
       // Wait for it to reset itself
       setTimeout(function() {
         // Now upload our code to it
-        connection.write('\x03\x10if(1){'+BANGLE_ACC_CODE+BANGLE_HRM_CODE+BANGLE_HRM_DISPLAY+'}\n',
+        connection.write('\x03\x10if(1){'+BANGLE_ACC_CODE+BANGLE_MAG_CODE+BANGLE_HRM_CODE+'}\n',
           function() {
             console.log('Ready...');
             console.log('TIME STAMP to connect');
