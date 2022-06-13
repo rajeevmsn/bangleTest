@@ -37,6 +37,35 @@ Bangle.on('mag',function(mag) {
   Bluetooth.println(m.join(","));
 })
 `;
+//Writng sensor data when a sudden movement happens (acceleromter and magnetometer for now) in the csv file in bangle local memory
+const BANGLE_GESTURE_DATA =`
+event = "ConnectDataGesture";
+
+function gotGesture(d) {
+  var gestureData = require("Storage").open(event+".csv", "a");
+  //print("timestamp, x, y, z, mx, my, mz, mdx, mdy, mdz");
+  gestureData.write("x, y, z, mx, my, mz, mdx, mdy, mdz\\n");
+  
+  for (var j=0;j<d.length;j+=3) {
+    c= Bangle.getCompass(); //compass
+    //print(j +", ", d[j] + ", " + d[j+1] + ", " + d[j+2]+"," + c.x +"," + c.y +"," + c.z +"," + c.dx +"," + c.dy +"," + c.dz );
+    gestureData.write(j + ", " + d[j] + ", " + d[j+1] + ", " + d[j+2] +"," + c.x +"," + c.y +"," + c.z +"," + c.dx +"," + c.dy +"," + c.dz +"\\n" );
+  }
+}
+Bangle.setCompassPower(1);
+Bangle.on('gesture',gotGesture);
+`;
+//Writng sensor data (acceleromter and magnetometer for now) in the csv file in bangle local memory
+const BANGLE_ALL_DATA =`
+event = "ConnectAllData";
+Bangle.setCompassPower(1);
+var c = Bangle.getCompass();
+var a = Bangle.getAccel();
+
+var allData = require("Storage").open(event+".csv", "a");
+allData.write(" x, y, z, mx, my, mz, mdx, mdy, mdz\\n");
+allData.write(a.x+ "," + a.y+ "," +a.z+"," + c.x +"," + c.y +"," + c.z +"," + c.dx +"," + c.dy +"," + c.dz +"\\n");
+`;
 
 //to obtain HRM from Bangle.js check https://banglejs.com/reference#l_Bangle_HRM-raw
 const BANGLE_HRM_CODE = `
@@ -52,6 +81,7 @@ Bangle.on('HRM-raw', function(hrm){
   Bluetooth.println(hrmRaw.join(","));
 })
 `;
+
 
 //for HRM display on bangle screen
 //Shamelessly copied from https://forum.espruino.com/conversations/367186/
@@ -197,7 +227,9 @@ document.getElementById('btConnect').addEventListener('click', function() {
       // Wait for it to reset itself
       setTimeout(function() {
         // Now upload our code to it
-        connection.write('\x03\x10if(1){'+BANGLE_ACC_CODE+BANGLE_MAG_CODE+BANGLE_HRM_CODE+'}\n',
+        //connection.write('\x03\x10if(1){'+BANGLE_ACC_CODE+BANGLE_MAG_CODE+BANGLE_HRM_CODE+'}\n',
+        connection.write('\x03\x10if(1){'+BANGLE_ALL_DATA+BANGLE_GESTURE_DATA+'}\n',
+        //connection.write('\x03\x10if(1){'+BANGLE_ALL_DATA+'}\n',
           function() {
             console.log('Ready...');
             console.log('TIME STAMP to connect');
