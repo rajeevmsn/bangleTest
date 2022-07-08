@@ -4,6 +4,8 @@
 /* global hello, config */
 /* exported connect disconnect online tokenValue sendData getData */
 
+//const { utils } = require('hellojs');
+
 let response;
 
 // to obtain acceleormeter data Bangle.js check https://banglejs.com/reference#t_l_Bangle_accel
@@ -43,13 +45,14 @@ event = "ConnectDataGesture";
 
 function gotGesture(d) {
   var gestureData = require("Storage").open(event+".csv", "a");
-  //print("timestamp, x, y, z, mx, my, mz, mdx, mdy, mdz");
-  gestureData.write("x, y, z, mx, my, mz, mdx, mdy, mdz\\n");
+  //print("date, timestamp, x, y, z, mx, my, mz, mdx, mdy, mdz");
+  gestureData.write("Date, number, x, y, z, mx, my, mz, mdx, mdy, mdz\\n");
   
   for (var j=0;j<d.length;j+=3) {
     c= Bangle.getCompass(); //compass
+    t = Date.now(); //Gets the number of milliseconds elapsed since 1970 (or on embedded platforms, since startup)
     //print(j +", ", d[j] + ", " + d[j+1] + ", " + d[j+2]+"," + c.x +"," + c.y +"," + c.z +"," + c.dx +"," + c.dy +"," + c.dz );
-    gestureData.write(j + ", " + d[j] + ", " + d[j+1] + ", " + d[j+2] +"," + c.x +"," + c.y +"," + c.z +"," + c.dx +"," + c.dy +"," + c.dz +"\\n" );
+    gestureData.write(t+ "," + j + ", " + d[j] + ", " + d[j+1] + ", " + d[j+2] +"," + c.x +"," + c.y +"," + c.z +"," + c.dx +"," + c.dy +"," + c.dz +"\\n" );
   }
 }
 Bangle.setCompassPower(1);
@@ -57,14 +60,20 @@ Bangle.on('gesture',gotGesture);
 `;
 //Writng sensor data (acceleromter and magnetometer for now) in the csv file in bangle local memory
 const BANGLE_ALL_DATA =`
+Bangle.loadWidgets();
+Bangle.drawWidgets();
+
 event = "ConnectAllData";
 Bangle.setCompassPower(1);
 var c = Bangle.getCompass();
 var a = Bangle.getAccel();
 
 var allData = require("Storage").open(event+".csv", "a");
-allData.write(" x, y, z, mx, my, mz, mdx, mdy, mdz\\n");
-allData.write(a.x+ "," + a.y+ "," +a.z+"," + c.x +"," + c.y +"," + c.z +"," + c.dx +"," + c.dy +"," + c.dz +"\\n");
+var id = setInterval(function () { 
+  allData.write(Date.now() + "," + a.x+ "," + a.y+ "," +a.z+"," + c.x +"," + c.y +"," + c.z +"," + c.dx +"," + c.dy +"," + c.dz +"\\n"); }, 1000); // every 1 second
+
+changeInterval(id, 1500); // now runs every 1.5 seconds
+
 `;
 
 //to obtain HRM from Bangle.js check https://banglejs.com/reference#l_Bangle_HRM-raw
@@ -82,6 +91,16 @@ Bangle.on('HRM-raw', function(hrm){
 })
 `;
 
+const getBangleData = `
+var getBangle = require('Storage').read('ConnectAllData.csv\\1');
+Bluetooth.println(getBangle);
+//var array = getBangle.split("\\n");
+//Bluetooth.println(array);
+`;
+
+const removeBangleData = `
+require("Storage").erase('ConnectAllData.csv\\1');
+`;
 
 //for HRM display on bangle screen
 //Shamelessly copied from https://forum.espruino.com/conversations/367186/
@@ -178,23 +197,6 @@ for (var i=0;i<2;i++) {
 }
 `;
 
-/*
-Functions to explore
-Bangle.on('faceUp', function(up) { ... }); cheks if the watch is moved or not
-
-Bangle.getHealthStatus('range')
-
-Bangle.on('HRM', function(hrm){
-  var b = [
-    "HRM",
-    Math.round(hrm.bpm*100),
-    Math.round(hrm.confidence*100),
-    Math.round(hrm.raw*100)
-  ];
-  Bluetooth.println(b.join(","))
-})
-
-*/
 
 // When we click the bangle connect button...
 var connection;
@@ -228,8 +230,8 @@ document.getElementById('btConnect').addEventListener('click', function() {
       setTimeout(function() {
         // Now upload our code to it
         //connection.write('\x03\x10if(1){'+BANGLE_ACC_CODE+BANGLE_MAG_CODE+BANGLE_HRM_CODE+'}\n',
-        connection.write('\x03\x10if(1){'+BANGLE_ALL_DATA+BANGLE_GESTURE_DATA+'}\n',
-        //connection.write('\x03\x10if(1){'+BANGLE_ALL_DATA+'}\n',
+        //connection.write('\x03\x10if(1){'+BANGLE_ALL_DATA+BANGLE_GESTURE_DATA+'}\n',
+        connection.write('\x03\x10if(1){'+BANGLE_ALL_DATA+'}\n',
           function() {
             console.log('Ready...');
             console.log('TIME STAMP to connect');
@@ -240,10 +242,76 @@ document.getElementById('btConnect').addEventListener('click', function() {
   });
 });
 
+const csvToArray = (data, delimiter = ',') => {
+  if(typeof data==='undefined') {
+    console.log('Empty Data');
+  }
+  data
+    .slice(omitFirstRow ? data.indexOf('\n') + 1 : 0)
+    .split('\n')
+    .map((v) => v.split(delimiter));
+};
+
+// const csv2json = (str, delimiter = ',') => {
+//   const titles = str.slice(0, str.indexOf('\n')).split(delimiter);
+//   const rows = str.slice(str.indexOf('\n') + 1).split('\n');
+
+//   return rows.map((row) => {
+//     const values = row.split(delimiter);
+
+//     return titles.reduce((object, curr, i) => (object[curr] = values[i], object), {});
+//   });
+// };
+
+//const getsend = () => {
+document.getElementById('get-send-delete').addEventListener('click', function() {
+  // disconnect if connected already
+  // if (connection) {
+  //   //sendData('sessionEnd');
+  //   const bangleData = Array.from(connection.write('\x03\x10if(1){'+getBangleData+'}\n'));
+  //   console.log(bangleData);
+  //   connection.write('\x03\x10if(1){'+removeBangleData+'}\n');
+  // }
+  // // Connect
+  // Puck.connect(function(c) {
+  //   if (!c) {
+  //     alert('Couldn\'t connect!');
+
+  //     return;
+  //   }
+  //   connection = c;
+  // });
+  const bangleData = connection.write('\x03\x10if(1){'+getBangleData+'}\n');
+  console.log(Array.isArray(bangleData));
+
+  //const lines = bangleData.toString().split('\n');
+  // const titles = lines[0].split(' ');
+  // const bangleArray = new Array(lines.length - 1);
+  // for (const i = 1; i < lines.length; i++) {
+  //   bangleArray[i - 1] = {};
+  //   lines[i] = lines[i].split(' ');
+  //   for (const j = 0; j < titles.length; j++) {
+  //     bangleArray[i - 1][titles[j]] = lines[i][j];
+  //   }
+  // }
+
+  //const bangleArray = csvToArray(bangleData);
+  //const bangleArray = csv2json(bangleData);
+  //console.log(Array.isArray(bangleData));
+  //console.log(Array.isArray(bangleArray));
+  //connection.write('\x03\x10if(1){'+removeBangleData+'}\n');
+});
+
+
 // When we get a line of data, check it and if it's
 // from the accelerometer, update it
 const btOnline = (line) => {
   console.log('RECEIVED:'+line);
+  //const dataTest = line.split('\n');
+  const bangleArray = csvToArray(line);
+  console.log(Array.isArray(bangleArray));
+  //console.log(dataTest);
+  //console.log(dataTest[0]);
 
   /*const d = line.split(',');
   if (d.length==5 && d[0]=='A') {
