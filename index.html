@@ -32,22 +32,34 @@
         You are currently sharing data with Connect.<br />
         To stop sharing, <a href="" onclick="disconnect()">disconnect</a>.</br>
         
-        <button id="send-data" onclick="sendData()">
-           Send Data
+        <button class="button2" id="relax">
+           relax
         </button>
-        <button id="get-data" onclick="getData()">
-            Get Data
+        <button class="button2" id="angry">
+            angry
         </button>
+        <button class="button2" id="stress">
+          stress
+       </button>
+       <button class="button2" id="joy">
+        joy
+      </button>
+
+        <!-- <div class="slidecontainer">
+          <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+        </div> -->
+
       </div>
-      <button id="btConnect">Bangle Connect</button>
-      <button id="get-send-delete">Get send delete data</button>
+      <button id="btConnect">Bangle</button>
+      <button id="get-send-delete">Send Data</button>
+      
       <!-- <button id="get-send-delete" onclick = "getsend()">Get send delete data</button> -->
     </div>
     </div>
 
 <script src="https://www.puck-js.com/puck.js"></script>
-<script src="./node_modules/hellojs/dist/hello.js"></script>
-<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/hellojs/1.19.5/hello.js"></script> -->
+<!-- <script src="./node_modules/hellojs/dist/hello.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hellojs/1.19.5/hello.js"></script>
 <script src="./config-client.js"></script>
 <script src = "./index.js"></script>
 </body>
