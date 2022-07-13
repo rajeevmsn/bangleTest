@@ -69,9 +69,22 @@ var c = Bangle.getCompass();
 var a = Bangle.getAccel();
 
 var allData = require("Storage").open(event+".csv", "a");
-var id = setInterval(function () { 
-  allData.write(Date.now() + "," + a.x+ "," + a.y+ "," +a.z+"," + c.x +"," + c.y +"," + c.z +"," + c.dx +"," + c.dy +"," + c.dz +"\\n"); }, 1000); // every 1 second
+Bangle.setHRMPower(1);
 
+var id = setInterval(function () { 
+  Bangle.on('HRM-raw', function(hrm){
+  var hrmRaw = [
+    "HRM:",
+    hrm.raw,
+    hrm.filt,
+    hrm.bpm,
+    hrm.confidence
+  ];
+  //Data order in the csv
+//accelerometer[x,y,z], magentometr [x, y, g, dx, dy, dz], hrm [raw, filter, bpm, confidence]
+
+  allData.write(Date.now() + "," + a.x+ "," + a.y+ "," +a.z+"," + c.x +"," + c.y +"," + c.z +"," + c.dx +"," + c.dy +"," + c.dz +","+hrm.raw +","+hrm.filt+","+ hrm.bpm+ "," + hrm.confidence + "\\n"); }, 1000); // every 1 second
+});
 changeInterval(id, 1500); // now runs every 1.5 seconds
 
 `;
@@ -302,6 +315,44 @@ document.getElementById('get-send-delete').addEventListener('click', function() 
   //connection.write('\x03\x10if(1){'+removeBangleData+'}\n');
 });
 
+document.getElementById('get-send-delete').addEventListener('click', function() {
+  // disconnect if connected already
+  // if (connection) {
+  //   //sendData('sessionEnd');
+  //   const bangleData = Array.from(connection.write('\x03\x10if(1){'+getBangleData+'}\n'));
+  //   console.log(bangleData);
+  //   connection.write('\x03\x10if(1){'+removeBangleData+'}\n');
+  // }
+  // // Connect
+  // Puck.connect(function(c) {
+  //   if (!c) {
+  //     alert('Couldn\'t connect!');
+
+  //     return;
+  //   }
+  //   connection = c;
+  // });
+  const bangleData = connection.write('\x03\x10if(1){'+getBangleData+'}\n');
+  console.log(Array.isArray(bangleData));
+
+  //const lines = bangleData.toString().split('\n');
+  // const titles = lines[0].split(' ');
+  // const bangleArray = new Array(lines.length - 1);
+  // for (const i = 1; i < lines.length; i++) {
+  //   bangleArray[i - 1] = {};
+  //   lines[i] = lines[i].split(' ');
+  //   for (const j = 0; j < titles.length; j++) {
+  //     bangleArray[i - 1][titles[j]] = lines[i][j];
+  //   }
+  // }
+
+  //const bangleArray = csvToArray(bangleData);
+  //const bangleArray = csv2json(bangleData);
+  //console.log(Array.isArray(bangleData));
+  //console.log(Array.isArray(bangleArray));
+  //connection.write('\x03\x10if(1){'+removeBangleData+'}\n');
+});
+
 
 // When we get a line of data, check it and if it's
 // from the accelerometer, update it
@@ -325,6 +376,53 @@ const btOnline = (line) => {
     };*/
 };
 
+const connectURL = 'https://connect-project.io';
+
+//annotate function and annotation buttons
+const annotate = (subjectiveState) => {
+  const sessionInfo = hello('connect').getAuthResponse();
+  const accessToken = sessionInfo.access_token;
+  //const date = new Date();
+  //const currentTime = String(date.toISOString());
+
+  const userEmotion='';
+
+  const sendTime = new XMLHttpRequest();
+  sendTime.open('POST', `${connectURL}/parse/classes/userSubjectivestate`);
+
+  sendTime.setRequestHeader('content-type', 'application/json');
+  sendTime.setRequestHeader('x-parse-application-id', 'connect');
+  sendTime.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+
+  sendTime.onreadystatechange = function () {
+    if (sendTime.readyState === 4) {
+      console.log(sendTime.status);
+      console.log(sendTime.responseText);
+    }
+  };
+  const data = {
+    sessionId: 'BangleTest'
+  };
+  data[userEmotion]= subjectiveState;
+
+  const jsonData = JSON.stringify(data);
+  console.log(data);
+  sendTime.send(jsonData);
+
+};
+
+document.getElementById('calm').addEventListener('click', function() {
+  annotate('calm');
+});
+document.getElementById('angry').addEventListener('click', function() {
+  annotate('angry');
+});
+document.getElementById('stress').addEventListener('click', function() {
+  annotate('stress');
+});
+document.getElementById('happy').addEventListener('click', function() {
+  annotate('happy');
+});
 
 const displayConnected = () => {
   document.querySelector('#message').classList.add('connected');
@@ -359,8 +457,6 @@ const online = (session) => {
 
   return session && session.access_token && session.expires > currentTime;
 };
-
-const connectURL = 'https://connect-project.io';
 
 
 const userId = (accessToken) => {
