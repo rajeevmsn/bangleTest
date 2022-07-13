@@ -60,20 +60,84 @@ Bangle.on('gesture',gotGesture);
 `;
 //Writng sensor data (acceleromter and magnetometer for now) in the csv file in bangle local memory
 const BANGLE_ALL_DATA =`
-Bangle.loadWidgets();
-Bangle.drawWidgets();
-
+//Bangle.loadWidgets();
+//Bangle.drawWidgets();
+//Bangle.setLCDBrightness(0);
 event = "ConnectAllData";
 Bangle.setCompassPower(1);
 var c = Bangle.getCompass();
 var a = Bangle.getAccel();
 
 var allData = require("Storage").open(event+".csv", "a");
-var id = setInterval(function () { 
-  allData.write(Date.now() + "," + a.x+ "," + a.y+ "," +a.z+"," + c.x +"," + c.y +"," + c.z +"," + c.dx +"," + c.dy +"," + c.dz +"\\n"); }, 1000); // every 1 second
+Bangle.setHRMPower(1);
 
+
+
+var id = setInterval(function () { 
+  Bangle.on('HRM-raw', function(hrm){
+  var hrmRaw = [
+    "HRM:",
+    hrm.raw,
+    hrm.filt,
+    hrm.bpm,
+    hrm.confidence
+  ];
+  //Data order in the csv
+//accelerometer[x,y,z], magentometr [x, y, g, dx, dy, dz], hrm [raw, filter, bpm, confidence]
+
+  allData.write(Date.now() + "," + a.x+ "," + a.y+ "," +a.z+"," + c.x +"," + c.y +"," + c.z +"," + c.dx +"," + c.dy +"," + c.dz +","+hrm.raw +","+hrm.filt+","+ hrm.bpm+ "," + hrm.confidence + "\\n"); }, 1000); // every 1 second
+});
 changeInterval(id, 1500); // now runs every 1.5 seconds
 
+`;
+const BANGLE_DISPLAY = `
+// Load fonts
+require("Font7x11Numeric7Seg").add(Graphics);
+// position on screen
+const X = 130, Y = 110;
+
+function draw() {
+  // work out how to display the current time
+  var d = new Date();
+  var h = d.getHours(), m = d.getMinutes();
+  var time = (" "+h).substr(-2) + ":" + ("0"+m).substr(-2);
+  // Reset the state of the graphics library
+  g.reset();
+  // draw the current time (4x size 7 segment)
+  g.setFont("7x11Numeric7Seg",4);
+  g.setFontAlign(1,1); // align right bottom
+  g.drawString(time, X, Y, true /*clear background*/);
+  // draw the seconds (2x size 7 segment)
+  g.setFont("7x11Numeric7Seg",2);
+  g.drawString(("0"+d.getSeconds()).substr(-2), X+30, Y, true /*clear background*/);
+  // draw the date, in a normal font
+  g.setFont("6x8");
+  g.setFontAlign(0,1); // align center bottom
+  // pad the date - this clears the background if the date were to change length
+  var dateStr = "    "+require("locale").date(d)+"    ";
+  g.drawString(dateStr, g.getWidth()/2, Y+15, true /*clear background*/);
+}
+
+// Clear the screen once, at startup
+g.clear();
+// draw immediately at first
+draw();
+var secondInterval = setInterval(draw, 1000);
+// Stop updates when LCD is off, restart when on
+Bangle.on('lcdPower',on=>{
+  if (secondInterval) clearInterval(secondInterval);
+  secondInterval = undefined;
+  if (on) {
+    Bangle.setLCDBrightness(0);
+    secondInterval = setInterval(draw, 1000);
+    draw(); // draw immediately
+  }
+});
+// Show launcher when middle button pressed
+Bangle.setUI("clock");
+// Load widgets
+Bangle.loadWidgets();
+Bangle.drawWidgets();
 `;
 
 //to obtain HRM from Bangle.js check https://banglejs.com/reference#l_Bangle_HRM-raw
@@ -302,6 +366,44 @@ document.getElementById('get-send-delete').addEventListener('click', function() 
   //connection.write('\x03\x10if(1){'+removeBangleData+'}\n');
 });
 
+document.getElementById('get-send-delete').addEventListener('click', function() {
+  // disconnect if connected already
+  // if (connection) {
+  //   //sendData('sessionEnd');
+  //   const bangleData = Array.from(connection.write('\x03\x10if(1){'+getBangleData+'}\n'));
+  //   console.log(bangleData);
+  //   connection.write('\x03\x10if(1){'+removeBangleData+'}\n');
+  // }
+  // // Connect
+  // Puck.connect(function(c) {
+  //   if (!c) {
+  //     alert('Couldn\'t connect!');
+
+  //     return;
+  //   }
+  //   connection = c;
+  // });
+  const bangleData = connection.write('\x03\x10if(1){'+getBangleData+'}\n');
+  console.log(Array.isArray(bangleData));
+
+  //const lines = bangleData.toString().split('\n');
+  // const titles = lines[0].split(' ');
+  // const bangleArray = new Array(lines.length - 1);
+  // for (const i = 1; i < lines.length; i++) {
+  //   bangleArray[i - 1] = {};
+  //   lines[i] = lines[i].split(' ');
+  //   for (const j = 0; j < titles.length; j++) {
+  //     bangleArray[i - 1][titles[j]] = lines[i][j];
+  //   }
+  // }
+
+  //const bangleArray = csvToArray(bangleData);
+  //const bangleArray = csv2json(bangleData);
+  //console.log(Array.isArray(bangleData));
+  //console.log(Array.isArray(bangleArray));
+  //connection.write('\x03\x10if(1){'+removeBangleData+'}\n');
+});
+
 
 // When we get a line of data, check it and if it's
 // from the accelerometer, update it
@@ -325,6 +427,53 @@ const btOnline = (line) => {
     };*/
 };
 
+const connectURL = 'https://connect-project.io';
+
+//annotate function and annotation buttons
+const annotate = (subjectiveState) => {
+  const sessionInfo = hello('connect').getAuthResponse();
+  const accessToken = sessionInfo.access_token;
+  //const date = new Date();
+  //const currentTime = String(date.toISOString());
+
+  const userEmotion='';
+
+  const sendTime = new XMLHttpRequest();
+  sendTime.open('POST', `${connectURL}/parse/classes/userSubjectivestate`);
+
+  sendTime.setRequestHeader('content-type', 'application/json');
+  sendTime.setRequestHeader('x-parse-application-id', 'connect');
+  sendTime.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+
+  sendTime.onreadystatechange = function () {
+    if (sendTime.readyState === 4) {
+      console.log(sendTime.status);
+      console.log(sendTime.responseText);
+    }
+  };
+  const data = {
+    sessionId: 'BangleTest'
+  };
+  data[userEmotion]= subjectiveState;
+
+  const jsonData = JSON.stringify(data);
+  console.log(data);
+  sendTime.send(jsonData);
+
+};
+
+document.getElementById('calm').addEventListener('click', function() {
+  annotate('calm');
+});
+document.getElementById('angry').addEventListener('click', function() {
+  annotate('angry');
+});
+document.getElementById('stress').addEventListener('click', function() {
+  annotate('stress');
+});
+document.getElementById('happy').addEventListener('click', function() {
+  annotate('happy');
+});
 
 const displayConnected = () => {
   document.querySelector('#message').classList.add('connected');
@@ -359,8 +508,6 @@ const online = (session) => {
 
   return session && session.access_token && session.expires > currentTime;
 };
-
-const connectURL = 'https://connect-project.io';
 
 
 const userId = (accessToken) => {
