@@ -60,9 +60,9 @@ Bangle.on('gesture',gotGesture);
 `;
 //Writng sensor data (acceleromter and magnetometer for now) in the csv file in bangle local memory
 const BANGLE_ALL_DATA =`
-Bangle.loadWidgets();
-Bangle.drawWidgets();
-
+//Bangle.loadWidgets();
+//Bangle.drawWidgets();
+//Bangle.setLCDBrightness(0);
 event = "ConnectAllData";
 Bangle.setCompassPower(1);
 var c = Bangle.getCompass();
@@ -70,6 +70,8 @@ var a = Bangle.getAccel();
 
 var allData = require("Storage").open(event+".csv", "a");
 Bangle.setHRMPower(1);
+
+
 
 var id = setInterval(function () { 
   Bangle.on('HRM-raw', function(hrm){
@@ -87,6 +89,55 @@ var id = setInterval(function () {
 });
 changeInterval(id, 1500); // now runs every 1.5 seconds
 
+`;
+const BANGLE_DISPLAY = `
+// Load fonts
+require("Font7x11Numeric7Seg").add(Graphics);
+// position on screen
+const X = 130, Y = 110;
+
+function draw() {
+  // work out how to display the current time
+  var d = new Date();
+  var h = d.getHours(), m = d.getMinutes();
+  var time = (" "+h).substr(-2) + ":" + ("0"+m).substr(-2);
+  // Reset the state of the graphics library
+  g.reset();
+  // draw the current time (4x size 7 segment)
+  g.setFont("7x11Numeric7Seg",4);
+  g.setFontAlign(1,1); // align right bottom
+  g.drawString(time, X, Y, true /*clear background*/);
+  // draw the seconds (2x size 7 segment)
+  g.setFont("7x11Numeric7Seg",2);
+  g.drawString(("0"+d.getSeconds()).substr(-2), X+30, Y, true /*clear background*/);
+  // draw the date, in a normal font
+  g.setFont("6x8");
+  g.setFontAlign(0,1); // align center bottom
+  // pad the date - this clears the background if the date were to change length
+  var dateStr = "    "+require("locale").date(d)+"    ";
+  g.drawString(dateStr, g.getWidth()/2, Y+15, true /*clear background*/);
+}
+
+// Clear the screen once, at startup
+g.clear();
+// draw immediately at first
+draw();
+var secondInterval = setInterval(draw, 1000);
+// Stop updates when LCD is off, restart when on
+Bangle.on('lcdPower',on=>{
+  if (secondInterval) clearInterval(secondInterval);
+  secondInterval = undefined;
+  if (on) {
+    Bangle.setLCDBrightness(0);
+    secondInterval = setInterval(draw, 1000);
+    draw(); // draw immediately
+  }
+});
+// Show launcher when middle button pressed
+Bangle.setUI("clock");
+// Load widgets
+Bangle.loadWidgets();
+Bangle.drawWidgets();
 `;
 
 //to obtain HRM from Bangle.js check https://banglejs.com/reference#l_Bangle_HRM-raw
