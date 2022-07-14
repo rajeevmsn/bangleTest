@@ -436,8 +436,6 @@ const annotate = (subjectiveState) => {
   //const date = new Date();
   //const currentTime = String(date.toISOString());
 
-  const userEmotion='';
-
   const sendTime = new XMLHttpRequest();
   sendTime.open('POST', `${connectURL}/parse/classes/userSubjectivestate`);
 
@@ -454,7 +452,7 @@ const annotate = (subjectiveState) => {
   const data = {
     sessionId: 'BangleTest'
   };
-  data[userEmotion]= subjectiveState;
+  data.userEmotion = subjectiveState;
 
   const jsonData = JSON.stringify(data);
   console.log(data);
