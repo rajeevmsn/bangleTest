@@ -7,38 +7,8 @@
 //const { utils } = require('hellojs');
 
 let response;
+let bangleArray = [];
 
-// to obtain acceleormeter data Bangle.js check https://banglejs.com/reference#t_l_Bangle_accel
-const BANGLE_ACC_CODE = `
-Bangle.on('accel',function(a) {
-  var d = [
-    "A",
-    Math.round(a.x*100),
-    Math.round(a.y*100),
-    Math.round(a.z*100),
-    Math.round(a.diff*100),
-    Math.round(a.mag*100)
-    ];
-  Bluetooth.println(d.join(","));
-})
-`;
-//to o obtain magnetometer data Bangle.js check https://banglejs.com/reference#l_Bangle_mag
-const BANGLE_MAG_CODE = `
-Bangle.setCompassPower(1)
-Bangle.on('mag',function(mag) {
-  var m = [
-    "Mag",
-    mag.x,
-    mag.y,
-    mag.z,
-    mag.dx,
-    mag.dy,
-    mag.dz,
-    mag.heading
-    ];
-  Bluetooth.println(m.join(","));
-})
-`;
 //Writng sensor data when a sudden movement happens (acceleromter and magnetometer for now) in the csv file in bangle local memory
 const BANGLE_GESTURE_DATA =`
 event = "ConnectDataGesture";
@@ -59,22 +29,17 @@ Bangle.setCompassPower(1);
 Bangle.on('gesture',gotGesture);
 `;
 //Writng sensor data (acceleromter and magnetometer for now) in the csv file in bangle local memory
-const BANGLE_ALL_DATA =`
-//Bangle.loadWidgets();
-//Bangle.drawWidgets();
+const bangleRawData =`
+Bangle.loadWidgets();
+Bangle.drawWidgets();
 //Bangle.setLCDBrightness(0);
-event = "ConnectAllData";
+event = "connectAllData";
 Bangle.setCompassPower(1);
-var c = Bangle.getCompass();
-var a = Bangle.getAccel();
 
 var allData = require("Storage").open(event+".csv", "a");
 Bangle.setHRMPower(1);
 
-
-
-var id = setInterval(function () { 
-  Bangle.on('HRM-raw', function(hrm){
+Bangle.on('HRM-raw', function(hrm) {
   var hrmRaw = [
     "HRM:",
     hrm.raw,
@@ -82,15 +47,17 @@ var id = setInterval(function () {
     hrm.bpm,
     hrm.confidence
   ];
+  var c = Bangle.getCompass();
+  var a = Bangle.getAccel();
+
   //Data order in the csv
-//accelerometer[x,y,z], magentometr [x, y, g, dx, dy, dz], hrm [raw, filter, bpm, confidence]
-
-  allData.write(Date.now() + "," + a.x+ "," + a.y+ "," +a.z+"," + c.x +"," + c.y +"," + c.z +"," + c.dx +"," + c.dy +"," + c.dz +","+hrm.raw +","+hrm.filt+","+ hrm.bpm+ "," + hrm.confidence + "\\n"); }, 1000); // every 1 second
-});
-changeInterval(id, 1500); // now runs every 1.5 seconds
-
+  //timestamp, accelerometer[x,y,z], magentometr [x, y, g, dx, dy, dz], hrm [raw, filter, bpm, confidence]
+    
+  allData.write([Math.floor(Date.now()),a.x, a.y,a.z,c.x,c.y,c.z,c.dx,c.dy,c.dz,hrm.raw,hrm.filt,hrm.bpm,hrm.confidence].map((o)=>parseInt(o*1000)/1000).join(","));
+  allData.write("\\n");
+}, 1000); // every 1 second
 `;
-const BANGLE_DISPLAY = `
+const bangleClockDisplay = `
 // Load fonts
 require("Font7x11Numeric7Seg").add(Graphics);
 // position on screen
@@ -134,7 +101,7 @@ Bangle.on('lcdPower',on=>{
   }
 });
 // Show launcher when middle button pressed
-Bangle.setUI("clock");
+//Bangle.setUI("clock");
 // Load widgets
 Bangle.loadWidgets();
 Bangle.drawWidgets();
@@ -155,15 +122,96 @@ Bangle.on('HRM-raw', function(hrm){
 })
 `;
 
+const bangleProcessedData = `
+//Bangle.loadWidgets();
+//Bangle.drawWidgets();
+event = "connectAllData";
+Bangle.setCompassPower(1);
+
+var allData = require("Storage").open(event+".csv", "a");
+Bangle.setHRMPower(1);
+
+const buffer = {
+  start: null,
+  end: null,
+  data: []
+};
+const maxSamples = 300;
+
+const computeBufferAverage = () => {
+  let sum = [], sum2=[], mean = [], std = [];
+  const nrows = maxSamples;
+  const ncols = buffer.data[0].length;
+  for(let i=0;i<ncols;i++) {
+    sum[i] = 0; sum2[i] = 0; mean[i] = 0; std[i] = 0;
+  }
+  
+  for(const data of buffer.data){
+  for(let i=0; i<ncols; i++)
+  {
+    sum[i] += data[i];
+    sum2[i] += data[i]*data[i];
+  }
+  }
+  
+  for (let i=0; i<ncols; i++) {
+    mean[i] = sum[i] / nrows;
+    std[i] = Math.sqrt(nrows*sum2[i] - Math.pow(sum[i], 2))/(nrows-1);
+  }
+  return {mean: mean, std: std};
+};
+
+Bangle.on('HRM-raw', function(hrm) {
+  var hrmRaw = [
+    "HRM:",
+    hrm.raw,
+    hrm.filt,
+    hrm.bpm,
+    hrm.confidence
+  ];
+  var c = Bangle.getCompass();
+  var a = Bangle.getAccel();
+
+  //Data order in the csv
+  //timestamp, accelerometer[x,y,z], magentometr [x, y, g, dx, dy, dz], hrm [raw, filter, bpm, confidence]
+
+if (buffer.data.length === 0) {
+    buffer.start = Math.floor(Date.now());
+  }
+  
+  if (buffer.data.length < maxSamples) {
+    buffer.data.push([
+      a.x, a.y,a.z,c.x,c.y,c.z,c.dx,c.dy,c.dz,hrm.raw,hrm.filt,hrm.bpm,hrm.confidence
+    ]);
+
+  } else {
+    buffer.end = Math.floor(Date.now());
+    const result = computeBufferAverage(buffer.data);
+    
+    const str = [
+      buffer.start,
+      buffer.end,
+      result.mean.join(","),
+      result.std.join(",")
+    ].join(",");
+    
+    allData.write(str);
+    allData.write("\\n");
+    buffer.data = []; //Empty data
+  }
+});
+`;
+
 const getBangleData = `
-var getBangle = require('Storage').read('ConnectAllData.csv\\1');
-Bluetooth.println(getBangle);
+const getBangle = require('Storage').read('connectAllData.csv\\1');
+Bluetooth.println("<data>\\n"+getBangle+"\\n</data>");
+//require("Storage").erase('connectAllData.csv\\1');
 //var array = getBangle.split("\\n");
 //Bluetooth.println(array);
 `;
 
 const removeBangleData = `
-require("Storage").erase('ConnectAllData.csv\\1');
+require("Storage").erase('connectAllData.csv\\1');
 `;
 
 //for HRM display on bangle screen
@@ -293,9 +341,8 @@ document.getElementById('btConnect').addEventListener('click', function() {
       // Wait for it to reset itself
       setTimeout(function() {
         // Now upload our code to it
-        //connection.write('\x03\x10if(1){'+BANGLE_ACC_CODE+BANGLE_MAG_CODE+BANGLE_HRM_CODE+'}\n',
         //connection.write('\x03\x10if(1){'+BANGLE_ALL_DATA+BANGLE_GESTURE_DATA+'}\n',
-        connection.write('\x03\x10if(1){'+BANGLE_ALL_DATA+'}\n',
+        connection.write('\x03\x10if(1){'+bangleProcessedData+'}\n',
           function() {
             console.log('Ready...');
             console.log('TIME STAMP to connect');
@@ -306,125 +353,47 @@ document.getElementById('btConnect').addEventListener('click', function() {
   });
 });
 
-const csvToArray = (data, delimiter = ',') => {
-  if(typeof data==='undefined') {
-    console.log('Empty Data');
-  }
-  data
-    .slice(omitFirstRow ? data.indexOf('\n') + 1 : 0)
-    .split('\n')
-    .map((v) => v.split(delimiter));
-};
-
-// const csv2json = (str, delimiter = ',') => {
-//   const titles = str.slice(0, str.indexOf('\n')).split(delimiter);
-//   const rows = str.slice(str.indexOf('\n') + 1).split('\n');
-
-//   return rows.map((row) => {
-//     const values = row.split(delimiter);
-
-//     return titles.reduce((object, curr, i) => (object[curr] = values[i], object), {});
-//   });
-// };
-
 //const getsend = () => {
 document.getElementById('get-send-delete').addEventListener('click', function() {
-  // disconnect if connected already
-  // if (connection) {
-  //   //sendData('sessionEnd');
-  //   const bangleData = Array.from(connection.write('\x03\x10if(1){'+getBangleData+'}\n'));
-  //   console.log(bangleData);
-  //   connection.write('\x03\x10if(1){'+removeBangleData+'}\n');
-  // }
-  // // Connect
-  // Puck.connect(function(c) {
-  //   if (!c) {
-  //     alert('Couldn\'t connect!');
 
-  //     return;
-  //   }
-  //   connection = c;
-  // });
-  const bangleData = connection.write('\x03\x10if(1){'+getBangleData+'}\n');
-  console.log(Array.isArray(bangleData));
-
-  //const lines = bangleData.toString().split('\n');
-  // const titles = lines[0].split(' ');
-  // const bangleArray = new Array(lines.length - 1);
-  // for (const i = 1; i < lines.length; i++) {
-  //   bangleArray[i - 1] = {};
-  //   lines[i] = lines[i].split(' ');
-  //   for (const j = 0; j < titles.length; j++) {
-  //     bangleArray[i - 1][titles[j]] = lines[i][j];
-  //   }
-  // }
-
-  //const bangleArray = csvToArray(bangleData);
-  //const bangleArray = csv2json(bangleData);
-  //console.log(Array.isArray(bangleData));
-  //console.log(Array.isArray(bangleArray));
-  //connection.write('\x03\x10if(1){'+removeBangleData+'}\n');
+  bangleArray =[];
+  connection.write(`\x03\x10if(1){${getBangleData}}\n`);
+  //connection.write(`\x03\x10if(1){${removeBangleData}}\n`);
 });
 
-document.getElementById('get-send-delete').addEventListener('click', function() {
-  // disconnect if connected already
-  // if (connection) {
-  //   //sendData('sessionEnd');
-  //   const bangleData = Array.from(connection.write('\x03\x10if(1){'+getBangleData+'}\n'));
-  //   console.log(bangleData);
-  //   connection.write('\x03\x10if(1){'+removeBangleData+'}\n');
-  // }
-  // // Connect
-  // Puck.connect(function(c) {
-  //   if (!c) {
-  //     alert('Couldn\'t connect!');
-
-  //     return;
-  //   }
-  //   connection = c;
-  // });
-  const bangleData = connection.write('\x03\x10if(1){'+getBangleData+'}\n');
-  console.log(Array.isArray(bangleData));
-
-  //const lines = bangleData.toString().split('\n');
-  // const titles = lines[0].split(' ');
-  // const bangleArray = new Array(lines.length - 1);
-  // for (const i = 1; i < lines.length; i++) {
-  //   bangleArray[i - 1] = {};
-  //   lines[i] = lines[i].split(' ');
-  //   for (const j = 0; j < titles.length; j++) {
-  //     bangleArray[i - 1][titles[j]] = lines[i][j];
-  //   }
-  // }
-
-  //const bangleArray = csvToArray(bangleData);
-  //const bangleArray = csv2json(bangleData);
-  //console.log(Array.isArray(bangleData));
-  //console.log(Array.isArray(bangleArray));
-  //connection.write('\x03\x10if(1){'+removeBangleData+'}\n');
-});
-
+// Get localStorage data if any, or initialize the localStorageObject
+let localStorageObject;
+if (localStorage.bangle) {
+  localStorageObject = JSON.parse(localStorage.bangle);
+} else {
+  localStorageObject = {
+    stream: [],
+    events: []
+  };
+}
 
 // When we get a line of data, check it and if it's
 // from the accelerometer, update it
-const btOnline = (line) => {
-  console.log('RECEIVED:'+line);
-  //const dataTest = line.split('\n');
-  const bangleArray = csvToArray(line);
-  console.log(Array.isArray(bangleArray));
-  //console.log(dataTest);
-  //console.log(dataTest[0]);
+var savingDataFlag = false;
+const btOnline = (lines) => {
+  // const d = lines.split('\n');
 
-  /*const d = line.split(',');
-  if (d.length==5 && d[0]=='A') {
-    // we have an accelerometer reading
-    const accel = {
-      x : parseInt(d[1]),
-      y : parseInt(d[2]),
-      z : parseInt(d[3]),
-      diff: parseInt(d[4]),
-      mag: parseInt(d[5])
-    };*/
+  for (const line of lines.split('\n')) {
+    if (line.match('<data>')) {
+      savingDataFlag = true;
+    } else if (line.match('</data>')) {
+      savingDataFlag = false;
+    } else if (savingDataFlag) {
+      const cols = line.split(',');
+      if (cols.length === 14) {
+        bangleArray.push(cols.map((val) => Number(val)));
+      }
+      // bangleArray.push(line);
+    }
+  }
+
+  localStorageObject.stream.concat(bangleArray);
+  localStorage.bangle = JSON.stringify(localStorageObject);
 };
 
 const connectURL = 'https://connect-project.io';
