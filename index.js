@@ -538,7 +538,8 @@ const initHello = () => {
           label.id = 'profile_' + auth.network;
           document.getElementById('profile').appendChild(label);
         }
-        label.innerHTML = '<img src="' + r.thumbnail + '" /> Hey ' + r.name;
+        label.innerHTML = (r.thumbnail ? '<img src="' + r.thumbnail + ' /> ' : '')
+        + 'Hey ' + (r.name || r.id);
       });
   });
 

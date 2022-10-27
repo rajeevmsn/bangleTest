@@ -11,7 +11,18 @@ const config = {
       // the response_type in the connect configuration must be set to 'token' instead of 'code'
     },
     base: 'https://connect-project.io/',
-    get: { me: 'profile' }
+    get: { me: 'oauth/user' },
+    xhr: function(p) {
+      const token = p.query.access_token;
+      delete p.query.access_token;
+      if(token) {
+        p.headers = {
+          'Authorization': 'Bearer ' + token
+        };
+      }
+
+      return true;
+    }
   },
   clientId: 'pub_4d4a2d500c784f4098215d25263736d0', //connectApp
   //clientId: 'pub_7c86d46ef00845449f1af4b71f659148', //Test19/01
