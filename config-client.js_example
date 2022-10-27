@@ -10,7 +10,18 @@ const config = {
       response_type: 'code'
     },
     base: 'https://connect-project.io/',
-    get: { me: 'profile' }
+    get: { me: 'oauth/user' },
+    xhr: function(p) {
+      const token = p.query.access_token;
+      delete p.query.access_token;
+      if(token) {
+        p.headers = {
+          'Authorization': 'Bearer ' + token
+        };
+      }
+
+      return true;
+    }
   },
   clientId: 'pub_xxx',
   oauthProxy: 'http://localhost:3500/oauthproxy',
