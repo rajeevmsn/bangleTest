@@ -10,7 +10,7 @@ let response;
 let bangleArray = [];
 
 //Writng sensor data when a sudden movement happens (acceleromter and magnetometer for now) in the csv file in bangle local memory
-const BANGLE_GESTURE_DATA =`
+const bangleGestureData =`
 event = "ConnectDataGesture";
 
 function gotGesture(d) {
@@ -108,7 +108,7 @@ Bangle.drawWidgets();
 `;
 
 //to obtain HRM from Bangle.js check https://banglejs.com/reference#l_Bangle_HRM-raw
-const BANGLE_HRM_CODE = `
+const bangleHRM = `
 Bangle.setHRMPower(1)
 Bangle.on('HRM-raw', function(hrm){
   var hrmRaw = [
@@ -123,8 +123,8 @@ Bangle.on('HRM-raw', function(hrm){
 `;
 
 const bangleProcessedData = `
-//Bangle.loadWidgets();
-//Bangle.drawWidgets();
+var img = require("heatshrink").decompress(atob("slkwhC/AH4A/AH4A/AH4A/AH4A/AH4A/AH4A2iIABF9kBGAQzsGAUikcikIypGAMSmYADmURiDDnGAoABmgymMQIwGAAKYBMUsjGJEzMkkBSY4ADmJkjiMTGJRkBGMYwLZIKWhShiWCGMSUMmcyS0MRkYxMZETGNAANBGOD6hfBr6igIx/GM8ykUiAoQEBkYxmiIABoQxDG4IJCkaV/GCURGKBnBGLgeBGISNBSgaWCkIHCGIRlbSYMxGIInCkUTLoYKBmURAoQzBGLcTEwUf//y/8xGIf/mQJBfII8BGMES//z/8SmUjGIM/A4PxAoIxeoYxCmMvMQMTGIQ6DBoRjiZAL+CGIb0CNIQxjAAYxDAAhuCGLkSGKUxiAxagERmQxRkIxdiQxQiSUbSwT0CGJ0RMThkCiIxQGDpkCGJzFdMggxOSj4xCFQ0TGI4wfSwIqHNYwxiiQxMmKUgZBD4oZBLGnZBEiSgsRMcUBSwsiHAkRSsYxBMgpiEiSWjiIABYpLTBSz5gBF4URLIJiGHYUhGTowDSYIkBS4syBgJjBGTxdFdwMRoYwEiUhHQZpBMTa9FK4USkQDBA4MxGIMxB4RlYQgkziZbBRQYABN4UxAYIxCMgIyWYgSLDkYmCAwVEHoZuCB4MzkTLWMIpTCRQQAIGIwyCMKb1EGITuEAA0hF4INBGIQ6BMiJhFAAIeBBI4/EF4IxFZYIyPgJhBkIjEA4IxLPAQxBDAj9QgIYBmSNEAgKeGMQgnBe4ZCEZR5YDJYMyDwMTmQlBZA4KBiYxBmI2DMohkNEocxkYbBiUTXQJNBS4o7CUQQwCIQoOBSppHDDYQcBdgQ4COQYGBAoMhB4IxGkTJPXoYxEWoYsCAAYJDUoYxDCQhkOKAQcDKAgmDaYIHDJAIxENIJgNS4yADEAT3GdogNCI4RoCGCKXEDYgyKFgIVBfQYYCGCRkCPgKZBmJMBYAiaFBgMBCgMykY5CACiXCQ4R+CMwUSkUiAoQLCb4bETS4wdBJoosCAAYUGHIgyYDiQ6HGSxNZAH4A/AH4A/AH4A/AH4A/AH4A/AH4A/AFIA="));
+
 event = "connectAllData";
 Bangle.setCompassPower(1);
 
@@ -200,6 +200,10 @@ if (buffer.data.length === 0) {
     buffer.data = []; //Empty data
   }
 });
+g.clear(1);
+Bangle.loadWidgets();
+Bangle.drawWidgets();
+g.drawImage(img, 50,50);
 `;
 
 const getBangleData = `
@@ -341,7 +345,7 @@ document.getElementById('btConnect').addEventListener('click', function() {
       // Wait for it to reset itself
       setTimeout(function() {
         // Now upload our code to it
-        //connection.write('\x03\x10if(1){'+BANGLE_ALL_DATA+BANGLE_GESTURE_DATA+'}\n',
+        //connection.write('\x03\x10if(1){'+bangleHRM+bangleGestureData+'}\n',
         connection.write('\x03\x10if(1){'+bangleProcessedData+'}\n',
           function() {
             console.log('Ready...');
@@ -357,26 +361,29 @@ document.getElementById('btConnect').addEventListener('click', function() {
 document.getElementById('get-send-delete').addEventListener('click', function() {
 
   bangleArray =[];
+  console.log('Sent');
   connection.write(`\x03\x10if(1){${getBangleData}}\n`);
   //connection.write(`\x03\x10if(1){${removeBangleData}}\n`);
 });
 
 // Get localStorage data if any, or initialize the localStorageObject
 let localStorageObject;
-if (localStorage.bangle) {
-  localStorageObject = JSON.parse(localStorage.bangle);
-} else {
-  localStorageObject = {
-    stream: [],
-    events: []
-  };
-}
+
 
 // When we get a line of data, check it and if it's
 // from the accelerometer, update it
 var savingDataFlag = false;
 const btOnline = (lines) => {
   // const d = lines.split('\n');
+  if (localStorage.bangle) {
+    localStorageObject = JSON.parse(localStorage.bangle);
+  } else {
+    localStorageObject = {
+      stream: [],
+      events: []
+    };
+    localStorage.setItem('bangle', JSON.stringify(localStorageObject));
+  }
 
   for (const line of lines.split('\n')) {
     if (line.match('<data>')) {
@@ -385,15 +392,18 @@ const btOnline = (lines) => {
       savingDataFlag = false;
     } else if (savingDataFlag) {
       const cols = line.split(',');
-      if (cols.length === 14) {
+      if (cols.length === 28) {
         bangleArray.push(cols.map((val) => Number(val)));
+        //localStorage.setItem('bangleArray', JSON.stringify(bangleArray));
+        //localStorageObject.stream.push(bangleArray);
+        //localStorageObject.stream.concat(bangleArray);
+        localStorage.setItem('bangle', JSON.stringify(bangleArray));
+        //localStorage.bangle = JSON.stringify(localStorageObject);
       }
-      // bangleArray.push(line);
+      //bangleArray.push(line);
     }
   }
 
-  localStorageObject.stream.concat(bangleArray);
-  localStorage.bangle = JSON.stringify(localStorageObject);
 };
 
 const connectURL = 'https://connect-project.io';
