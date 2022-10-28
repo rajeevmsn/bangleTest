@@ -362,7 +362,7 @@ document.getElementById('btConnect').addEventListener('click', function() {
 document.getElementById('get-send-delete').addEventListener('click', function() {
 
   bangleArray =[];
-  console.log('Sent');
+  //console.log('Sent');
   connection.write(`\x03\x10if(1){${getBangleData}}\n`);
   //connection.write(`\x03\x10if(1){${removeBangleData}}\n`);
 });
@@ -390,18 +390,19 @@ const btOnline = (lines) => {
     if (line.match('<data>')) {
       savingDataFlag = true;
     } else if (line.match('</data>')) {
+      //localStorage.setItem('bangleArray', JSON.stringify(bangleArray));
+      localStorageObject.stream.push(bangleArray);
+      //localStorageObject.stream.concat(bangleArray);
+      //localStorage.setItem('bangle', JSON.stringify(bangleArray));
+      localStorage.bangle = JSON.stringify(localStorageObject);
+      console.log('sent');
+      //bangleArray.push(line);
       savingDataFlag = false;
     } else if (savingDataFlag) {
       const cols = line.split(',');
       if (cols.length === 28) {
         bangleArray.push(cols.map((val) => Number(val)));
-        //localStorage.setItem('bangleArray', JSON.stringify(bangleArray));
-        //localStorageObject.stream.push(bangleArray);
-        //localStorageObject.stream.concat(bangleArray);
-        localStorage.setItem('bangle', JSON.stringify(bangleArray));
-        //localStorage.bangle = JSON.stringify(localStorageObject);
       }
-      //bangleArray.push(line);
     }
   }
 
