@@ -1,8 +1,9 @@
 /* eslint-disable max-statements */
 /* eslint-disable max-lines */
 /* eslint-disable no-alert */
-/* global hello, config */
-/* exported connect disconnect online tokenValue sendData getData */
+/* global hello, config, Puck */
+/* exported connect disconnect online tokenValue userId sendData getData */
+/* exported bangleGestureData bangleRawData bangleClockDisplay bangleHRM bangleHRMdisplay */
 
 //const { utils } = require('hellojs');
 
@@ -220,7 +221,7 @@ require("Storage").erase('connectAllData.csv\\1');
 
 //for HRM display on bangle screen
 //Shamelessly copied from https://forum.espruino.com/conversations/367186/
-const BANGLE_HRM_DISPLAY = `
+const bangleHRMdisplay = `
 
 Bangle.setLCDPower(1);
 Bangle.setLCDTimeout(0);
@@ -315,7 +316,7 @@ for (var i=0;i<2;i++) {
 
 
 // When we click the bangle connect button...
-var connection;
+let connection;
 document.getElementById('btConnect').addEventListener('click', function() {
   // disconnect if connected already
   if (connection) {
@@ -372,7 +373,7 @@ let localStorageObject;
 
 // When we get a line of data, check it and if it's
 // from the accelerometer, update it
-var savingDataFlag = false;
+let savingDataFlag = false;
 const btOnline = (lines) => {
   // const d = lines.split('\n');
   if (localStorage.bangle) {
