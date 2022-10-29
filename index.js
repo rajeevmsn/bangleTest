@@ -137,7 +137,7 @@ const buffer = {
   end: null,
   data: []
 };
-const maxSamples = 300;
+const maxSamples = 150;
 
 const computeBufferAverage = () => {
   let sum = [], sum2=[], mean = [], std = [];
