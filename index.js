@@ -443,15 +443,25 @@ const annotate = (subjectiveState) => {
 
 };
 
+const annotate = (subjectiveState) => {
+  checkLocalStorage();
+  const annotateArray = [Date.now(), subjectiveState];
+  localStorageObject.events.push(annotateArray);
+  localStorage.bangle = JSON.stringify(localStorageObject);
+};
+
 document.getElementById('calm').addEventListener('click', function() {
   annotate('calm');
 });
+
 document.getElementById('angry').addEventListener('click', function() {
   annotate('angry');
 });
+
 document.getElementById('stress').addEventListener('click', function() {
   annotate('stress');
 });
+
 document.getElementById('happy').addEventListener('click', function() {
   annotate('happy');
 });
