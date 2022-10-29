@@ -208,15 +208,15 @@ g.drawImage(img, 50,50);
 `;
 
 const getBangleData = `
+//getting Data
 const getBangle = require('Storage').read('connectAllData.csv\\1');
+//Sending Data
 Bluetooth.println("<data>\\n"+getBangle+"\\n</data>");
-//require("Storage").erase('connectAllData.csv\\1');
+//Removing Data
+require("Storage").erase('connectAllData.csv\\1');
+
 //var array = getBangle.split("\\n");
 //Bluetooth.println(array);
-`;
-
-const removeBangleData = `
-require("Storage").erase('connectAllData.csv\\1');
 `;
 
 //for HRM display on bangle screen
@@ -314,7 +314,6 @@ for (var i=0;i<2;i++) {
 }
 `;
 
-
 // When we click the bangle connect button...
 let connection;
 document.getElementById('btConnect').addEventListener('click', function() {
@@ -364,7 +363,6 @@ document.getElementById('get-send-delete').addEventListener('click', function() 
   bangleArray =[];
   //console.log('Sent');
   connection.write(`\x03\x10if(1){${getBangleData}}\n`);
-  //connection.write(`\x03\x10if(1){${removeBangleData}}\n`);
 });
 
 // Get localStorage data if any, or initialize the localStorageObject
