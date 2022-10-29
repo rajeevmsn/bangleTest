@@ -1,8 +1,9 @@
 /* eslint-disable max-statements */
 /* eslint-disable max-lines */
 /* eslint-disable no-alert */
-/* global hello, config */
-/* exported connect disconnect online tokenValue sendData getData */
+/* global hello, config, Puck */
+/* exported connect disconnect online tokenValue userId sendData getData */
+/* exported bangleGestureData bangleRawData bangleClockDisplay bangleHRM bangleHRMdisplay */
 
 //const { utils } = require('hellojs');
 
@@ -136,7 +137,7 @@ const buffer = {
   end: null,
   data: []
 };
-const maxSamples = 300;
+const maxSamples = 150;
 
 const computeBufferAverage = () => {
   let sum = [], sum2=[], mean = [], std = [];
@@ -194,7 +195,7 @@ if (buffer.data.length === 0) {
       result.mean.join(","),
       result.std.join(",")
     ].join(",");
-    
+    allData = require("Storage").open(event+".csv", "a");
     allData.write(str);
     allData.write("\\n");
     buffer.data = []; //Empty data
@@ -207,20 +208,20 @@ g.drawImage(img, 50,50);
 `;
 
 const getBangleData = `
+//getting Data
 const getBangle = require('Storage').read('connectAllData.csv\\1');
+//Sending Data
 Bluetooth.println("<data>\\n"+getBangle+"\\n</data>");
-//require("Storage").erase('connectAllData.csv\\1');
+//Removing Data
+require("Storage").erase('connectAllData.csv\\1');
+
 //var array = getBangle.split("\\n");
 //Bluetooth.println(array);
 `;
 
-const removeBangleData = `
-require("Storage").erase('connectAllData.csv\\1');
-`;
-
 //for HRM display on bangle screen
 //Shamelessly copied from https://forum.espruino.com/conversations/367186/
-const BANGLE_HRM_DISPLAY = `
+const bangleHRMdisplay = `
 
 Bangle.setLCDPower(1);
 Bangle.setLCDTimeout(0);
@@ -313,9 +314,8 @@ for (var i=0;i<2;i++) {
 }
 `;
 
-
 // When we click the bangle connect button...
-var connection;
+let connection;
 document.getElementById('btConnect').addEventListener('click', function() {
   // disconnect if connected already
   if (connection) {
@@ -361,9 +361,8 @@ document.getElementById('btConnect').addEventListener('click', function() {
 document.getElementById('get-send-delete').addEventListener('click', function() {
 
   bangleArray =[];
-  console.log('Sent');
+  //console.log('Sent');
   connection.write(`\x03\x10if(1){${getBangleData}}\n`);
-  //connection.write(`\x03\x10if(1){${removeBangleData}}\n`);
 });
 
 // Get localStorage data if any, or initialize the localStorageObject
@@ -372,7 +371,7 @@ let localStorageObject;
 
 // When we get a line of data, check it and if it's
 // from the accelerometer, update it
-var savingDataFlag = false;
+let savingDataFlag = false;
 const btOnline = (lines) => {
   // const d = lines.split('\n');
   if (localStorage.bangle) {
@@ -389,18 +388,19 @@ const btOnline = (lines) => {
     if (line.match('<data>')) {
       savingDataFlag = true;
     } else if (line.match('</data>')) {
+      //localStorage.setItem('bangleArray', JSON.stringify(bangleArray));
+      localStorageObject.stream.push(bangleArray);
+      //localStorageObject.stream.concat(bangleArray);
+      //localStorage.setItem('bangle', JSON.stringify(bangleArray));
+      localStorage.bangle = JSON.stringify(localStorageObject);
+      console.log('sent');
+      //bangleArray.push(line);
       savingDataFlag = false;
     } else if (savingDataFlag) {
       const cols = line.split(',');
       if (cols.length === 28) {
         bangleArray.push(cols.map((val) => Number(val)));
-        //localStorage.setItem('bangleArray', JSON.stringify(bangleArray));
-        //localStorageObject.stream.push(bangleArray);
-        //localStorageObject.stream.concat(bangleArray);
-        localStorage.setItem('bangle', JSON.stringify(bangleArray));
-        //localStorage.bangle = JSON.stringify(localStorageObject);
       }
-      //bangleArray.push(line);
     }
   }
 
