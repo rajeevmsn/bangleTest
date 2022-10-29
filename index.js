@@ -368,12 +368,7 @@ document.getElementById('get-send-delete').addEventListener('click', function() 
 // Get localStorage data if any, or initialize the localStorageObject
 let localStorageObject;
 
-
-// When we get a line of data, check it and if it's
-// from the accelerometer, update it
-let savingDataFlag = false;
-const btOnline = (lines) => {
-  // const d = lines.split('\n');
+const checkLocalStorage = () => {
   if (localStorage.bangle) {
     localStorageObject = JSON.parse(localStorage.bangle);
   } else {
@@ -383,6 +378,15 @@ const btOnline = (lines) => {
     };
     localStorage.setItem('bangle', JSON.stringify(localStorageObject));
   }
+};
+
+
+// When we get a line of data, check it and if it's
+// from the accelerometer, update it
+let savingDataFlag = false;
+const btOnline = (lines) => {
+  // const d = lines.split('\n');
+  checkLocalStorage();
 
   for (const line of lines.split('\n')) {
     if (line.match('<data>')) {
@@ -439,15 +443,25 @@ const annotate = (subjectiveState) => {
 
 };
 
+const annotate = (subjectiveState) => {
+  checkLocalStorage();
+  const annotateArray = [Date.now(), subjectiveState];
+  localStorageObject.events.push(annotateArray);
+  localStorage.bangle = JSON.stringify(localStorageObject);
+};
+
 document.getElementById('calm').addEventListener('click', function() {
   annotate('calm');
 });
+
 document.getElementById('angry').addEventListener('click', function() {
   annotate('angry');
 });
+
 document.getElementById('stress').addEventListener('click', function() {
   annotate('stress');
 });
+
 document.getElementById('happy').addEventListener('click', function() {
   annotate('happy');
 });
