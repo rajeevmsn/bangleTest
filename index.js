@@ -368,12 +368,7 @@ document.getElementById('get-send-delete').addEventListener('click', function() 
 // Get localStorage data if any, or initialize the localStorageObject
 let localStorageObject;
 
-
-// When we get a line of data, check it and if it's
-// from the accelerometer, update it
-let savingDataFlag = false;
-const btOnline = (lines) => {
-  // const d = lines.split('\n');
+const checkLocalStorage = () => {
   if (localStorage.bangle) {
     localStorageObject = JSON.parse(localStorage.bangle);
   } else {
@@ -383,6 +378,15 @@ const btOnline = (lines) => {
     };
     localStorage.setItem('bangle', JSON.stringify(localStorageObject));
   }
+};
+
+
+// When we get a line of data, check it and if it's
+// from the accelerometer, update it
+let savingDataFlag = false;
+const btOnline = (lines) => {
+  // const d = lines.split('\n');
+  checkLocalStorage();
 
   for (const line of lines.split('\n')) {
     if (line.match('<data>')) {
