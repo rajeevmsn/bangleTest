@@ -195,7 +195,7 @@ if (buffer.data.length === 0) {
       result.mean.join(","),
       result.std.join(",")
     ].join(",");
-    
+    allData = require("Storage").open(event+".csv", "a");
     allData.write(str);
     allData.write("\\n");
     buffer.data = []; //Empty data
