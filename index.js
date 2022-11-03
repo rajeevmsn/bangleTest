@@ -413,7 +413,7 @@ const btOnline = (lines) => {
 const connectURL = 'https://connect-project.io';
 
 //annotate function and annotation buttons
-const annotate = (subjectiveState) => {
+const sendAnnotations = (subjectiveState) => {
   const sessionInfo = hello('connect').getAuthResponse();
   const accessToken = sessionInfo.access_token;
   //const date = new Date();
