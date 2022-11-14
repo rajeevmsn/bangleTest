@@ -17,58 +17,58 @@
  </head>
  <body class="fullscreen">
     <div class="container">
-  <div id="header">
-    <!-- <a href="" onclick="signin();">Sign in</a> -->
-    <div id="profile_connect">[]</div>
-  </div>
-  <div id="content">
-    <div id="logo">
-        <svg width="42px" height="42px" transform="scale(3)">
-            <circle class="avatar" r="20px" cx="21px" cy="21px" fill="grey"></circle>
-            <circle r="8px" cx="21px" cy="15px" fill="#eee"></circle>
-            <circle r="15px" cx="21px" cy="40px" fill="#eee"></circle>
-            <circle r="20px" cx="21px" cy="21px" fill="none" stroke="grey" stroke-width="0.5px"></circle>
-        </svg>
-    </div>
-    <div id="message" style="text-align: center;">
+        <div id="header">
+        <!-- <a href="" onclick="signin();">Sign in</a> -->
+            <div id="profile_connect">[]</div>
+        </div>
+        <div id="content">
+            <div id="logo">
+                <svg width="42px" height="42px" transform="scale(3)">
+                    <circle class="avatar" r="20px" cx="21px" cy="21px" fill="grey"></circle>
+                    <circle r="8px" cx="21px" cy="15px" fill="#eee"></circle>
+                    <circle r="15px" cx="21px" cy="40px" fill="#eee"></circle>
+                    <circle r="20px" cx="21px" cy="21px" fill="none" stroke="grey" stroke-width="0.5px"></circle>
+                </svg>
+            </div>
+        <div id="message" style="text-align: center;">
       
-      <div id="message-disconnected">
-        You are currently not sharing data with Connect.
-        Click the button to start sharing annonymous usage data.
-        (You can stop sharing any time)<br />
+        <div id="message-disconnected">
+            You are currently not sharing data with Connect.
+            Click the button to start sharing annonymous usage data.
+            (You can stop sharing any time)<br />
+            
+            <button id="connect" onclick="connect()">
+            Connect
+            </button>
+        </div>
+        <div id="message-connected">
+            You are currently sharing data with Connect.<br />
+            To stop sharing, <a href="" onclick="disconnect()">disconnect</a>.</br>
         
-        <button id="connect" onclick="connect()">
-          Connect
-        </button>
-      </div>
-      <div id="message-connected">
-        You are currently sharing data with Connect.<br />
-        To stop sharing, <a href="" onclick="disconnect()">disconnect</a>.</br>
+            <button class="button2" id="calm">
+                calm
+            </button>
+            <button class="button2" id="angry">
+                angry
+            </button>
+            <button class="button2" id="stress">
+                stress
+            </button>
+            <button class="button2" id="happy">
+                happy
+            </button>
+
+            <!-- <div class="slidecontainer">
+            <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+            </div> -->
+
+        </div>
+        <button id="btConnect">Bangle</button>
+        <button id="get-send-delete">Send Data</button>
         
-        <button class="button2" id="calm">
-           calm
-        </button>
-        <button class="button2" id="angry">
-            angry
-        </button>
-        <button class="button2" id="stress">
-          stress
-       </button>
-       <button class="button2" id="happy">
-        happy
-      </button>
-
-        <!-- <div class="slidecontainer">
-          <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
-        </div> -->
-
-      </div>
-      <button id="btConnect">Bangle</button>
-      <button id="get-send-delete">Send Data</button>
-      
-      <!-- <button id="get-send-delete" onclick = "getsend()">Get send delete data</button> -->
-    </div>
-    </div>
+        <!-- <button id="get-send-delete" onclick = "getsend()">Get send delete data</button> -->
+        </div>
+        </div>
     </div>
 <script src="./js/main.js"></script>
 <script src="https://www.puck-js.com/puck.js"></script>
