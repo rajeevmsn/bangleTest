@@ -453,7 +453,6 @@ const annotate = (subjectiveState) => {
 
 document.getElementById('calm').addEventListener('click', function() {
   annotate('calm');
-  console.log('sent');
 });
 
 document.getElementById('angry').addEventListener('click', function() {
