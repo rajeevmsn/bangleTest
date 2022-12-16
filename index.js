@@ -470,11 +470,11 @@ document.getElementById('happy').addEventListener('click', function() {
 
 const displayConnected = () => {
   document.querySelector('#message').classList.add('connected');
-  document.querySelector('.avatar').classList.add('connected');
+  //document.querySelector('.avatar').classList.add('connected');
 };
 
 const displayDisconnected = () => {
-  document.querySelector('.avatar').classList.remove('connected');
+  //document.querySelector('.avatar').classList.remove('connected');
 };
 
 const connect = () => {
