@@ -467,6 +467,21 @@ document.getElementById('happy').addEventListener('click', function() {
   annotate('happy');
 });
 
+document.getElementById('happy').addEventListener('click', function() {
+  annotate('happy');
+});
+
+const guide = () => {
+  document.querySelector('#message').classList.add('guide');
+  document.querySelector('#message').classList.remove('home');
+};
+
+
+const displayHome = () => {
+  document.querySelector('#message').classList.add('home');
+  document.querySelector('#message').classList.remove('guide');
+};
+
 const displayConnected = () => {
   document.querySelector('#message').classList.add('connected');
   //document.querySelector('.avatar').classList.add('connected');
