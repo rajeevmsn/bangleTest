@@ -61,17 +61,31 @@ button:hover {
     background: #67a;
 }
 
-#message.connected > #message-connected {
+#message.home > #home {
     display: block;
 }
-#message.connected > #message-disconnected {
+#message.home > #help {
     display: none;
 }
 
-#message:not(.connected) > #message-connected {
+
+#message:not(.home) > #home {
     display: none;
 }
-#message:not(.connected) > #message-disconnected {
+#message:not(.home) > #help {
+    display: block;
+}
+
+#home.connected > #message-connected {
+    display: block;
+}
+#home.connected > #message-disconnected {
+    display: none;
+}
+#home:not(.connected) > #message-connected {
+    display: none;
+}
+#home:not(.connected) > #message-disconnected {
     display: block;
 }
 
@@ -145,4 +159,13 @@ button:hover {
     top: 85%;
     left: 5%;
     width: 90%;
+}
+.button8{
+    bottom: 10px;
+    left: 5%;
+    height: 48px;
+    width: 48px;
+    border-radius: 50%;
+    background-color: rgb(227, 227, 227);
+    border: none;
 }
