@@ -15,6 +15,11 @@ html,
     margin: auto;
     text-align: center;
 }
+
+.oldData{
+    position: absolute;
+    top: 80%
+}
   
 #header>* {
     float: right;
@@ -46,7 +51,7 @@ html,
     font-size: 96px;
 } */
 button {
-    position:absolute;
+    
     width: 20%;
     height: 48px;
     background: #89c;
@@ -61,6 +66,16 @@ button:hover {
     background: #67a;
 }
 
+legend {
+    color: white;
+    background-color: black;
+    padding: 5px 10px;
+    border-radius: 0;
+    border: 0;
+    font-size: 14px;
+  }
+
+/*Swap between home and help */
 #message.home > #home {
     display: block;
 }
@@ -68,20 +83,21 @@ button:hover {
     display: none;
 }
 
-
-#message:not(.home) > #home {
+#message.guide > #home {
     display: none;
 }
-#message:not(.home) > #help {
+#message.guide > #help {
     display: block;
 }
 
+/*Swap between connect and disconnect buttons*/
 #home.connected > #message-connected {
     display: block;
 }
 #home.connected > #message-disconnected {
     display: none;
 }
+
 #home:not(.connected) > #message-connected {
     display: none;
 }
@@ -89,18 +105,36 @@ button:hover {
     display: block;
 }
 
-.avatar {
+/*To swap between form and eter delayed annotation button*/
+
+#home.enterPreviousData > #message-enterPreviousData {
+    display: block;
+}
+#home.enterPreviousData > #message-sendPreviousData {
+    display: none;
+}
+
+#home:not(.enterPreviousData) > #message-enterPreviousData {
+    display: none;
+}
+#home:not(.enterPreviousData) > #message-sendPreviousData {
+    display: block;
+}
+
+/* .avatar {
     fill: grey;
 }
 
 .avatar.connected {
     fill: #1c1;
-}
+} */
 .button1{
+    position:absolute;
     top: 10px;
     right: 5%;
 }
 .guide{
+    position:absolute;
     top: 10px;
     left: 5%;
     height: 48px;
@@ -145,27 +179,32 @@ button:hover {
     width: 25%;
 }
 .button6b{
+    position:absolute;
     top: 70%;
     left: 37.5%;
     width: 25%;
 }
 .button6c{
+    position:absolute;
     top: 70%;
     right:5%;
     width: 25%;
 }
 .button7{
     position: absolute;
-    top: 85%;
+    top: 80%;
     left: 5%;
     width: 90%;
 }
-.button8{
-    bottom: 10px;
+.oldData{
+    top: 80%;
     left: 5%;
+    width: 90%;
+}
+
+.button8{
+    top: 5%;
+    right: 5%;
     height: 48px;
     width: 48px;
-    border-radius: 50%;
-    background-color: rgb(227, 227, 227);
-    border: none;
 }
