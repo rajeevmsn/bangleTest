@@ -2,13 +2,14 @@
 /* eslint-disable max-lines */
 /* eslint-disable no-alert */
 /* global hello, config, Puck */
-/* exported connect disconnect online tokenValue userId sendData getData */
+/* exported connect disconnect previousData online tokenValue userId sendData getData displayHome guide sendAnnotations*/
 /* exported bangleGestureData bangleRawData bangleClockDisplay bangleHRM bangleHRMdisplay */
 
 //const { utils } = require('hellojs');
 
 let response;
 let bangleArray = [];
+let connection;
 
 //Writng sensor data when a sudden movement happens (acceleromter and magnetometer for now) in the csv file in bangle local memory
 const bangleGestureData =`
@@ -314,48 +315,6 @@ for (var i=0;i<2;i++) {
 }
 `;
 
-// When we click the bangle connect button...
-let connection;
-document.getElementById('btConnect').addEventListener('click', function() {
-  // disconnect if connected already
-  if (connection) {
-    connection.close(); console.log('TIME STAMP to connect');
-    sendData('sessionEnd');
-    connection = undefined;
-  }
-  // Connect
-  Puck.connect(function(c) {
-    if (!c) {
-      alert('Couldn\'t connect!');
-
-      return;
-    }
-    connection = c;
-    // Handle the data we get back, and call 'onLine'
-    // whenever we get a line
-    let buf = '';
-    connection.on('data', function(d) {
-      buf += d;
-      const l = buf.split('\n');
-      buf = l.pop();
-      l.forEach(btOnline);
-    });
-    // First, reset the Bangle
-    connection.write('reset();\n', function() {
-      // Wait for it to reset itself
-      setTimeout(function() {
-        // Now upload our code to it
-        //connection.write('\x03\x10if(1){'+bangleHRM+bangleGestureData+'}\n',
-        connection.write('\x03\x10if(1){'+bangleProcessedData+'}\n',
-          function() {
-            console.log('Ready...');
-            console.log('TIME STAMP to connect');
-            sendData('sessionBegin');
-          });
-      }, 1500);
-    });
-  });
-});
 
 //const getsend = () => {
 document.getElementById('get-send-delete').addEventListener('click', function() {
@@ -588,6 +547,48 @@ const sendData = (sessionStatus) => {
   console.log(data);
   sendTime.send(jsonData);
 };
+
+// When we click the bangle connect button...
+document.getElementById('btConnect').addEventListener('click', function() {
+  // disconnect if connected already
+  if (connection) {
+    connection.close(); console.log('TIME STAMP to connect');
+    sendData('sessionEnd');
+    connection = undefined;
+  }
+  // Connect
+  Puck.connect(function(c) {
+    if (!c) {
+      alert('Couldn\'t connect!');
+
+      return;
+    }
+    connection = c;
+    // Handle the data we get back, and call 'onLine'
+    // whenever we get a line
+    let buf = '';
+    connection.on('data', function(d) {
+      buf += d;
+      const l = buf.split('\n');
+      buf = l.pop();
+      l.forEach(btOnline);
+    });
+    // First, reset the Bangle
+    connection.write('reset();\n', function() {
+      // Wait for it to reset itself
+      setTimeout(function() {
+        // Now upload our code to it
+        //connection.write('\x03\x10if(1){'+bangleHRM+bangleGestureData+'}\n',
+        connection.write('\x03\x10if(1){'+bangleProcessedData+'}\n',
+          function() {
+            console.log('Ready...');
+            console.log('TIME STAMP to connect');
+            sendData('sessionBegin');
+          });
+      }, 1500);
+    });
+  });
+});
 
 const initHello = () => {
   // configure Connect network
