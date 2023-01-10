@@ -491,6 +491,21 @@ const displayDisconnected = () => {
   //document.querySelector('.avatar').classList.remove('connected');
 };
 
+const previousData = () => {
+  document.querySelector('#home').classList.remove('sendPreviousData');
+  document.querySelector('#home').classList.add('enterPreviousData');
+};
+
+const form=document.querySelector('form');
+form.addEventListener('submit', (event) => {
+  document.querySelector('#home').classList.remove('enterPreviousData');
+  document.querySelector('#home').classList.add('sendPreviousData');
+},
+
+false
+);
+
+
 const connect = () => {
   hello('connect').login()
     .then((res) => {
