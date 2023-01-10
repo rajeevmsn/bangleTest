@@ -18,17 +18,14 @@
  <body class="fullscreen">
     <div class="container">
         <div id="message" style="text-align: center;">
-
             <div id="home">
                 <button class="guide" id="userGuide" onclick="guide()"> &#10067; </button>
-
                 <div id="message-disconnected">
-                    <button class="button1" id="connect" onclick="connect()">  &#9989; Connect </button>
+                    <button class="button1" id="connect" onclick="connect()"> To Connect </button>
                 </div>
                 <div id="message-connected">
-                    <button class="button1" onclick="disconnect()"> &#10060; disconnect </button>
+                    <button class="button1" onclick="disconnect()"> To disconnect </button>
                 </div>
-                
                 <div class="box2">
                     <button class="button2" id="calm"> &#128524; Calm </button>
                     <button class="button3" id="angry"> &#128545; Angry </button>
@@ -38,26 +35,50 @@
                 <button class= "button6a" id="btConnect"> &#8986; Get watch data</button>
                 <button class= "button6b" id="viewData">&#128202;  View data</button>
                 <button class= "button6c" id="get-send-delete">Send data</button>
+                <div id="message-sendPreviousData">
                 <button class="button7" id="pastData" onclick="previousData()"> &#128524; &#128545; &#128534; &#128513; Enter a delayed annotation &#9203; </button>
+            </div>
+                <div class="oldData" id="message-enterPreviousData">
+                    <form>
+                        <fieldset>
+                            <legend>Please enter previous data</legend>
+                            <div>
+                                <input type="radio" id="stateChoice1" name="subjectiveState" value="calm" />
+                                <label for="stateChoice1">Calm</label>
+
+                                <input type="radio" id="stateChoice2" name="subjectiveState" value="angry" />
+                                <label for="stateChoice2">Angry</label>
+
+                                <input type="radio" id="stateChoice3" name="subjectiveState" value="stress" />
+                                <label for="stateChoice3">Stressed</label>
+
+                                <input type="radio" id="stateChoice4" name="subjectiveState" value="happy" />
+                                <label for="stateChoice4">Happy</label>
+                            </div>
+                            <div>
+                                <label for="eventTime">Select date and time</label>
+                                <input id="stateTime" type="datetime-local" name="previousTime" required/>
+
+                                <button type="submit">Submit</button>
+                            </div>
+                        </fieldset>
+                    </form>
+                    <pre id="log"></pre>
+                </div>
+                
             </div>
 
             <div id="help">
                 <button class="button8" onclick="displayHome()"> &#10060; close </button>
-                Instructions about the app and buttons
-            </div>
+                <h3>User Guide</h3>
+                <p> </p>
             
-            <div id="previousData">
-                Text box for the time and date
-                radio button for subjective state
-                submit button
-                <button class="button8" onclick="displayHome()"> &#10060; close </button>
             </div>
             
         </div>
     </div>
 <script src="./js/main.js"></script>
 <script src="https://www.puck-js.com/puck.js"></script>
-<!-- <script src="./node_modules/hellojs/dist/hello.js"></script> -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hellojs/1.19.5/hello.js"></script>
 <script src="./config-client.js"></script>
 <script src = "./index.js"></script>
