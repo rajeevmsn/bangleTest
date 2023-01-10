@@ -153,21 +153,25 @@ legend {
     background: rgb(226, 225, 225); 
 }
 .button2{
+    position: absolute;
     top: 10%;
     left:25%;
     width: 50%;
 }
 .button3{
+    position: absolute;
     top: 30%;
     left:25%;
     width: 50%;
 }
 .button4{
+    position: absolute;
     top: 50%;
     left: 25%;
     width: 50%;
 }
 .button5{
+    position: absolute;
     top: 70%;
     left: 25%;
     width: 50%;

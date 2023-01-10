@@ -554,7 +554,7 @@ document.getElementById('btConnect').addEventListener('click', function() {
   if (connection) {
     connection.close(); console.log('TIME STAMP to connect');
     sendData('sessionEnd');
-    connection = undefined;
+    connection = null;
   }
   // Connect
   Puck.connect(function(c) {
@@ -583,7 +583,7 @@ document.getElementById('btConnect').addEventListener('click', function() {
           function() {
             console.log('Ready...');
             console.log('TIME STAMP to connect');
-            sendData('sessionBegin');
+            //sendData('sessionBegin');
           });
       }, 1500);
     });
