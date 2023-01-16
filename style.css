@@ -146,34 +146,34 @@ legend {
 }
 .box2{
     position:absolute;
-    top: 10%;
+    top: 15%;
     left: 5%;
     width: 90%;
-    height: 50%;
+    height: 40%;
     border-radius: 48px;
     background: rgb(226, 225, 225); 
 }
 .button2{
     position: absolute;
-    top: 10%;
+    top: 5%;
     left:25%;
     width: 50%;
 }
 .button3{
     position: absolute;
-    top: 30%;
+    top: 25%;
     left:25%;
     width: 50%;
 }
 .button4{
     position: absolute;
-    top: 50%;
+    top: 45%;
     left: 25%;
     width: 50%;
 }
 .button5{
     position: absolute;
-    top: 70%;
+    top: 65%;
     left: 25%;
     width: 50%;
 }
