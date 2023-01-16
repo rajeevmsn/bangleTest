@@ -438,6 +438,64 @@ const sendEvents=(eventsArray) => {
   sendTime.send(jsonData);
 };
 
+const sendStream=(stream) => {
+  const sessionInfo = hello('connect').getAuthResponse();
+  const accessToken = sessionInfo.access_token;
+  const sendTime = new XMLHttpRequest();
+  sendTime.open('POST', `${connectURL}/parse/classes/bangleStream`);
+
+  sendTime.setRequestHeader('content-type', 'application/json');
+  sendTime.setRequestHeader('x-parse-application-id', 'connect');
+  sendTime.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+
+  sendTime.onreadystatechange = function () {
+    if (sendTime.readyState === 4) {
+      console.log(sendTime.status);
+      console.log(sendTime.responseText);
+    }
+  };
+
+  const dataBangle = {
+    sessionId: 'BangleTest'
+  };
+  const bangleStream =[];
+  const combinedstream = [];
+  let swapstream =[];
+  //To merge all arrays to a single combined array
+  for (let l = 0; l < stream.length; l++) {
+    let c = [];
+    swapstream = stream[l];
+    for (let j = 0; j < swapstream.length; j++) {
+      c = swapstream[j];
+      combinedstream.push(c);
+    }
+  }
+
+  for (let l = 0; l < combinedstream.length; l++) {
+    const a = combinedstream[l].map(Number);
+    bangleStream[l] = {
+      bufferStart: a[0],
+      bufferStop: a[1],
+      //Accelerometer and gyroscope mean values
+      // eslint-disable-next-line camelcase, object-property-newline
+      ax_M: a[2], ay_M: a[3], az_M: a[4], cx_M: a[5], cy_M: a[6], cz_M: a[7], cdx_M: a[8], cdy_M: a[9], cdz_M: a[10],
+      //Heart rate monitor mean values
+      // eslint-disable-next-line camelcase, object-property-newline
+      hrmRaw_M: a[11], hrmFilt_M: a[12], hrmBPM_M: a[13], hrmConfidence_M: a[14],
+      //Accelerometer and gyroscope standar deviation values
+      // eslint-disable-next-line camelcase, object-property-newline
+      ax_S: a[15], ay_S: a[16], az_S: a[17], cx_S: a[18], cy_S: a[19], cz_S: a[20], cdx_S: a[21], cdy_S: a[22], cdz_S: a[23],
+      //Heart rate monitor standard deviation values
+      // eslint-disable-next-line camelcase, object-property-newline
+      hrmRaw_S: a[24], hrmFilt_S: a[25], hrmBPM_S: a[26], hrmConfidence_S: a[27]
+    };
+  }
+
+  dataBangle.bangle = bangleStream;
+  const jsonData = JSON.stringify(dataBangle);
+  sendTime.send(jsonData);
+};
+
 //Sending data from local memory to connect
 document.getElementById('get-send-delete').addEventListener('click', function() {
   checkLocalStorage();
