@@ -1,4 +1,4 @@
-const cacheName = 'bangleTest';
+const cacheName = 'ladybug';
 const filesToCache = [
   '/',
   '/index.html',
