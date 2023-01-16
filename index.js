@@ -438,12 +438,21 @@ const sendEvents=(eventsArray) => {
   sendTime.send(jsonData);
 };
 
+//Sending data from local memory to connect
+document.getElementById('get-send-delete').addEventListener('click', function() {
+  checkLocalStorage();
+  const {events} = localStorageObject;
+  const {stream} = localStorageObject;
+  sendEvents(events);
+  sendStream(stream);
+});
+
 const annotate = (subjectiveState) => {
   checkLocalStorage();
   const annotateArray = [Date.now(), subjectiveState];
   localStorageObject.events.push(annotateArray);
   localStorage.bangle = JSON.stringify(localStorageObject);
-  CacheStorage.bangle = JSON.stringify(localStorageObject);
+
 };
 
 document.getElementById('calm').addEventListener('click', function() {
