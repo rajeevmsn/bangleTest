@@ -419,16 +419,13 @@ document.getElementById('angry').addEventListener('click', function() {
 });
 
 document.getElementById('stress').addEventListener('click', function() {
-  annotate('stress');
+  annotate('stressed');
 });
 
 document.getElementById('happy').addEventListener('click', function() {
   annotate('happy');
 });
 
-document.getElementById('happy').addEventListener('click', function() {
-  annotate('happy');
-});
 
 const displayHome = () => {
   document.querySelector('#message').classList.remove('guide');
