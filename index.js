@@ -402,6 +402,42 @@ const sendAnnotations = (subjectiveState) => {
 
 };
 
+const sendEvents=(eventsArray) => {
+  const sessionInfo = hello('connect').getAuthResponse();
+  const accessToken = sessionInfo.access_token;
+  const sendTime = new XMLHttpRequest();
+  sendTime.open('POST', `${connectURL}/parse/classes/userAnnotations`);
+
+  sendTime.setRequestHeader('content-type', 'application/json');
+  sendTime.setRequestHeader('x-parse-application-id', 'connect');
+  sendTime.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+
+  sendTime.onreadystatechange = function () {
+    if (sendTime.readyState === 4) {
+      console.log(sendTime.status);
+      console.log(sendTime.responseText);
+    }
+  };
+
+  const data = {
+    sessionId: 'BangleTest'
+  };
+  const events =[];
+  for (let l = 0; l < eventsArray.length; l++) {
+    const a = eventsArray[l];
+    events[l] = {
+      timeStamp: a[0],
+      userAnnotation: a[1]
+    };
+  }
+
+  data.events = events;
+  //console.log(events);
+  const jsonData = JSON.stringify(data);
+  console.log(data);
+  sendTime.send(jsonData);
+};
+
 const annotate = (subjectiveState) => {
   checkLocalStorage();
   const annotateArray = [Date.now(), subjectiveState];
