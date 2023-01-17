@@ -1,11 +1,22 @@
 const cacheName = 'ladybug';
+
+/*when texting from laptop*/
+// const filesToCache = [
+//   '/',
+//   '/index.html',
+//   '/style.css',
+//   '/index.js',
+//   '/oauth-proxy/oauthshim.js',
+//   '/config-client.js'
+// ];
+/*for git*/
 const filesToCache = [
   '/',
-  '/index.html',
-  '/style.css',
-  '/index.js',
-  '/oauth-proxy/oauthshim.js',
-  '/config-client.js'
+  'https://rajeevmsn.github.io/bangleTest/index.html',
+  'https://rajeevmsn.github.io/bangleTest/style.css',
+  'https://rajeevmsn.github.io/bangleTest/index.js',
+  'https://rajeevmsn.github.io/bangleTest/oauth-proxy/oauthshim.js',
+  'https://rajeevmsn.github.io/bangleTest/config-client.js'
 ];
 
 /* Start the service worker and cache all of the app's content */
