@@ -356,7 +356,6 @@ const btOnline = (lines) => {
       //localStorageObject.stream.concat(bangleArray);
       //localStorage.setItem('bangle', JSON.stringify(bangleArray));
       localStorage.bangle = JSON.stringify(localStorageObject);
-      console.log('sent');
       //bangleArray.push(line);
       savingDataFlag = false;
     } else if (savingDataFlag) {
@@ -430,12 +429,11 @@ const sendEvents=(eventsArray) => {
       userAnnotation: a[1]
     };
   }
-
-  data.events = events;
-  //console.log(events);
-  const jsonData = JSON.stringify(data);
-  console.log(data);
-  sendTime.send(jsonData);
+  if(eventsArray.length>0) {
+    data.events = events;
+    const jsonData = JSON.stringify(data);
+    sendTime.send(jsonData);
+  }
 
   return eventsArray.length;
 };
@@ -492,22 +490,33 @@ const sendStream=(stream) => {
       hrmRaw_S: a[24], hrmFilt_S: a[25], hrmBPM_S: a[26], hrmConfidence_S: a[27]
     };
   }
-
-  dataBangle.bangle = bangleStream;
-  const jsonData = JSON.stringify(dataBangle);
-  sendTime.send(jsonData);
+  if(combinedstream.length>0) {
+    dataBangle.bangle = bangleStream;
+    const jsonData = JSON.stringify(dataBangle);
+    sendTime.send(jsonData);
+  }
 
   return combinedstream.length;
 };
 
 //Sending data from local memory to connect
 document.getElementById('get-send-delete').addEventListener('click', function() {
+
   checkLocalStorage();
   const {events} = localStorageObject;
   const {stream} = localStorageObject;
   const a = sendEvents(events);
   const s= sendStream(stream);
-  alert('Thank you ' + s + ' rows of watch data & ' + a +' annotations are sent to connect server');
+  if(a>0 && s>0) {
+    alert('Thank you! ' + s + ' rows of watch data & ' + a +' annotations are sent to connect server');
+  } else if (a>0 && s===0) {
+    alert('Thank you ' + a +' rows of annotations sent to connect server');
+  } else if (a===0 && s>0) {
+    alert('Thank you ' + s + ' rows of watch data is sent to connect server');
+  } else {
+    alert('Sorry! No data to send');
+  }
+
 });
 
 const annotate = (subjectiveState) => {
