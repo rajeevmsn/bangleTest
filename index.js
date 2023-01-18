@@ -519,6 +519,10 @@ document.getElementById('get-send-delete').addEventListener('click', function() 
 
 });
 
+document.getElementById('viewData').addEventListener('click', function() {
+  alert('Sorry! currently we are working on dashboard, in the next version you will be use it');
+});
+
 const annotate = (subjectiveState) => {
   checkLocalStorage();
   const annotateArray = [Date.now(), subjectiveState];
