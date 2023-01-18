@@ -436,6 +436,8 @@ const sendEvents=(eventsArray) => {
   const jsonData = JSON.stringify(data);
   console.log(data);
   sendTime.send(jsonData);
+
+  return eventsArray.length;
 };
 
 const sendStream=(stream) => {
@@ -494,6 +496,8 @@ const sendStream=(stream) => {
   dataBangle.bangle = bangleStream;
   const jsonData = JSON.stringify(dataBangle);
   sendTime.send(jsonData);
+
+  return combinedstream.length;
 };
 
 //Sending data from local memory to connect
@@ -501,8 +505,9 @@ document.getElementById('get-send-delete').addEventListener('click', function() 
   checkLocalStorage();
   const {events} = localStorageObject;
   const {stream} = localStorageObject;
-  sendEvents(events);
-  sendStream(stream);
+  const a = sendEvents(events);
+  const s= sendStream(stream);
+  alert('Thank you ' + s + ' rows of watch data & ' + a +' annotations are sent to connect server');
 });
 
 const annotate = (subjectiveState) => {
@@ -510,6 +515,7 @@ const annotate = (subjectiveState) => {
   const annotateArray = [Date.now(), subjectiveState];
   localStorageObject.events.push(annotateArray);
   localStorage.bangle = JSON.stringify(localStorageObject);
+  alert('annotation recorded');
 
 };
 
