@@ -594,7 +594,7 @@ const connect = () => {
 const disconnect = () => {
   hello('connect').logout()
     .then(() => {
-      location.href = '/';
+      location.href = './index.html';
     }, (err) => {
       console.log(err);
       alert('You did not sign in :-)');
@@ -689,7 +689,7 @@ document.getElementById('btConnect').addEventListener('click', function() {
           function() {
             console.log('Ready...');
             console.log('TIME STAMP to connect');
-            //sendData('sessionBegin');
+            alert('watch connected');
           });
       }, 1500);
     });

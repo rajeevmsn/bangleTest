@@ -1,6 +1,6 @@
 {
     "name": "ladybug",
-    "short_name": "bangle",
+    "short_name": "ladybug",
     "icons": [{
         "src": "images/ladybug-icon-128.png",
           "sizes": "128x128",
@@ -28,7 +28,7 @@
           "type": "image/png"
         }],    
     "lang": "en-US",
-    "start_url": "https://rajeevmsn.github.io/bangleTest/index.html",
+    "start_url": "./index.html",
     "display": "standalone",
     "background_color": "white",
     "theme_color": "white"

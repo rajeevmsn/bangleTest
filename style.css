@@ -207,9 +207,8 @@ legend {
     left: 5%;
     width: 90%;
     height: 20%;
-    font-size:calc(.5em + 1vw);
+    font-size: calc(.25em + .5vw);
 }
-
 .button8{
     top: 5%;
     right: 5%;

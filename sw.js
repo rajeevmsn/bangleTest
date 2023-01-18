@@ -2,12 +2,12 @@ const cacheName = 'ladybug';
 
 /*when texting from laptop*/
 const filesToCache = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/index.js',
-  '/oauth-proxy/oauthshim.js',
-  '/config-client.js'
+  './',
+  'index.html',
+  'style.css',
+  'index.js',
+  'oauth-proxy/oauthshim.js',
+  'config-client.js'
 ];
 
 /* Start the service worker and cache all of the app's content */
