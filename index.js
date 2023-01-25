@@ -370,24 +370,24 @@ const btOnline = (lines) => {
 
 const connectURL = 'https://connect-project.io';
 
-//annotate function and annotation buttons
+//if we want to send individual annotations
 const sendAnnotations = (subjectiveState) => {
   const sessionInfo = hello('connect').getAuthResponse();
   const accessToken = sessionInfo.access_token;
   //const date = new Date();
   //const currentTime = String(date.toISOString());
 
-  const sendTime = new XMLHttpRequest();
-  sendTime.open('POST', `${connectURL}/parse/classes/userSubjectivestate`);
+  const sendRequest = new XMLHttpRequest();
+  sendRequest.open('POST', `${connectURL}/parse/classes/userSubjectivestate`);
 
-  sendTime.setRequestHeader('content-type', 'application/json');
-  sendTime.setRequestHeader('x-parse-application-id', 'connect');
-  sendTime.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+  sendRequest.setRequestHeader('content-type', 'application/json');
+  sendRequest.setRequestHeader('x-parse-application-id', 'connect');
+  sendRequest.setRequestHeader('Authorization', `Bearer ${accessToken}`);
 
-  sendTime.onreadystatechange = function () {
-    if (sendTime.readyState === 4) {
-      console.log(sendTime.status);
-      console.log(sendTime.responseText);
+  sendRequest.onreadystatechange = function () {
+    if (sendRequest.readyState === 4) {
+      console.log(sendRequest.status);
+      console.log(sendRequest.responseText);
     }
   };
   const data = {
@@ -397,24 +397,25 @@ const sendAnnotations = (subjectiveState) => {
 
   const jsonData = JSON.stringify(data);
   console.log(data);
-  sendTime.send(jsonData);
+  sendRequest.send(jsonData);
 
 };
 
+//User annotation from local storage to connect
 const sendEvents=(eventsArray) => {
   const sessionInfo = hello('connect').getAuthResponse();
   const accessToken = sessionInfo.access_token;
-  const sendTime = new XMLHttpRequest();
-  sendTime.open('POST', `${connectURL}/parse/classes/userAnnotations`);
+  const sendRequest = new XMLHttpRequest();
+  sendRequest.open('POST', `${connectURL}/parse/classes/userAnnotations`);
 
-  sendTime.setRequestHeader('content-type', 'application/json');
-  sendTime.setRequestHeader('x-parse-application-id', 'connect');
-  sendTime.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+  sendRequest.setRequestHeader('content-type', 'application/json');
+  sendRequest.setRequestHeader('x-parse-application-id', 'connect');
+  sendRequest.setRequestHeader('Authorization', `Bearer ${accessToken}`);
 
-  sendTime.onreadystatechange = function () {
-    if (sendTime.readyState === 4) {
-      console.log(sendTime.status);
-      console.log(sendTime.responseText);
+  sendRequest.onreadystatechange = function () {
+    if (sendRequest.readyState === 4) {
+      console.log(sendRequest.status);
+      console.log(sendRequest.responseText);
     }
   };
 
@@ -432,26 +433,27 @@ const sendEvents=(eventsArray) => {
   if(eventsArray.length>0) {
     data.events = events;
     const jsonData = JSON.stringify(data);
-    sendTime.send(jsonData);
+    sendRequest.send(jsonData);
   }
 
   return eventsArray.length;
 };
 
+//bangle data (stream) from local storage to connect
 const sendStream=(stream) => {
   const sessionInfo = hello('connect').getAuthResponse();
   const accessToken = sessionInfo.access_token;
-  const sendTime = new XMLHttpRequest();
-  sendTime.open('POST', `${connectURL}/parse/classes/bangleStream`);
+  const sendRequest = new XMLHttpRequest();
+  sendRequest.open('POST', `${connectURL}/parse/classes/bangleStream`);
 
-  sendTime.setRequestHeader('content-type', 'application/json');
-  sendTime.setRequestHeader('x-parse-application-id', 'connect');
-  sendTime.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+  sendRequest.setRequestHeader('content-type', 'application/json');
+  sendRequest.setRequestHeader('x-parse-application-id', 'connect');
+  sendRequest.setRequestHeader('Authorization', `Bearer ${accessToken}`);
 
-  sendTime.onreadystatechange = function () {
-    if (sendTime.readyState === 4) {
-      console.log(sendTime.status);
-      console.log(sendTime.responseText);
+  sendRequest.onreadystatechange = function () {
+    if (sendRequest.readyState === 4) {
+      console.log(sendRequest.status);
+      console.log(sendRequest.responseText);
     }
   };
 
@@ -493,7 +495,7 @@ const sendStream=(stream) => {
   if(combinedstream.length>0) {
     dataBangle.bangle = bangleStream;
     const jsonData = JSON.stringify(dataBangle);
-    sendTime.send(jsonData);
+    sendRequest.send(jsonData);
   }
 
   return combinedstream.length;
@@ -547,7 +549,6 @@ document.getElementById('stress').addEventListener('click', function() {
 document.getElementById('happy').addEventListener('click', function() {
   annotate('happy');
 });
-
 
 const displayHome = () => {
   document.querySelector('#message').classList.remove('guide');
@@ -643,17 +644,17 @@ const sendData = (sessionStatus) => {
 
   const status = sessionStatus;
 
-  const sendTime = new XMLHttpRequest();
-  sendTime.open('POST', `${connectURL}/parse/classes/sessionTimestamp`);
+  const sendRequest = new XMLHttpRequest();
+  sendRequest.open('POST', `${connectURL}/parse/classes/sessionTimestamp`);
 
-  sendTime.setRequestHeader('content-type', 'application/json');
-  sendTime.setRequestHeader('x-parse-application-id', 'connect');
-  sendTime.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+  sendRequest.setRequestHeader('content-type', 'application/json');
+  sendRequest.setRequestHeader('x-parse-application-id', 'connect');
+  sendRequest.setRequestHeader('Authorization', `Bearer ${accessToken}`);
 
-  sendTime.onreadystatechange = function () {
-    if (sendTime.readyState === 4) {
-      console.log(sendTime.status);
-      console.log(sendTime.responseText);
+  sendRequest.onreadystatechange = function () {
+    if (sendRequest.readyState === 4) {
+      console.log(sendRequest.status);
+      console.log(sendRequest.responseText);
     }
   };
   const data = {
@@ -664,7 +665,7 @@ const sendData = (sessionStatus) => {
 
   const jsonData = JSON.stringify(data);
   console.log(data);
-  sendTime.send(jsonData);
+  sendRequest.send(jsonData);
 };
 
 // When we click the bangle connect button...
