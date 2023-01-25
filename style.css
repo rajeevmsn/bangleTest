@@ -106,6 +106,21 @@ legend {
     display: block;
 }
 
+/*Swap between connect watch and get watch data buttons*/
+#bt.btconnected > #message-btconnected {
+    display: block;
+}
+#bt.btconnected > #message-btdisconnected {
+    display: none;
+}
+
+#bt:not(.btconnected) > #message-btconnected {
+    display: none;
+}
+#bt:not(.btconnected) > #message-btdisconnected {
+    display: block;
+}
+
 /*To swap between form and eter delayed annotation button*/
 
 #home.enterPreviousData > #message-enterPreviousData {

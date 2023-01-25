@@ -672,7 +672,8 @@ const sendData = (sessionStatus) => {
 document.getElementById('btConnect').addEventListener('click', function() {
   // disconnect if connected already
   if (connection) {
-    connection.close(); console.log('TIME STAMP to connect');
+    connection.close();
+    document.querySelector('#bt').classList.add('btdisconnected');
     sendData('sessionEnd');
     connection = null;
   }
@@ -680,6 +681,7 @@ document.getElementById('btConnect').addEventListener('click', function() {
   Puck.connect(function(c) {
     if (!c) {
       alert('Couldn\'t connect!');
+      document.querySelector('#bt').classList.add('btdisconnected');
 
       return;
     }
@@ -704,10 +706,22 @@ document.getElementById('btConnect').addEventListener('click', function() {
             console.log('Ready...');
             console.log('TIME STAMP to connect');
             alert('watch connected');
+            document.querySelector('#bt').classList.add('btconnected');
           });
       }, 1500);
     });
   });
+});
+
+document.getElementById('getWatchConnect').addEventListener('click', function() {
+  if (connection) {
+    console.log('geting stream from watch');
+    bangleArray =[];
+    connection.write(`\x03\x10if(1){${getBangleData}}\n`);
+  } else {
+    document.querySelector('#bt').classList.add('btdisconnected');
+  }
+
 });
 
 const initHello = () => {
