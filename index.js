@@ -35,7 +35,7 @@ const bangleRawData =`
 Bangle.loadWidgets();
 Bangle.drawWidgets();
 //Bangle.setLCDBrightness(0);
-event = "connectAllData";
+event = "connectRawData";
 Bangle.setCompassPower(1);
 
 var allData = require("Storage").open(event+".csv", "a");
@@ -54,8 +54,8 @@ Bangle.on('HRM-raw', function(hrm) {
 
   //Data order in the csv
   //timestamp, accelerometer[x,y,z], magentometr [x, y, g, dx, dy, dz], hrm [raw, filter, bpm, confidence]
-    
-  allData.write([Math.floor(Date.now()),a.x, a.y,a.z,c.x,c.y,c.z,c.dx,c.dy,c.dz,hrm.raw,hrm.filt,hrm.bpm,hrm.confidence].map((o)=>parseInt(o*1000)/1000).join(","));
+  allData.write(Math.floor(Date.now()),a.x, a.y,a.z,c.x,c.y,c.z,c.dx,c.dy,c.dz,hrm.raw,hrm.filt,hrm.bpm,hrm.confidence);
+  //allData.write([Math.floor(Date.now()),a.x, a.y,a.z,c.x,c.y,c.z,c.dx,c.dy,c.dz,hrm.raw,hrm.filt,hrm.bpm,hrm.confidence].map((o)=>parseInt(o*1000)/1000).join(","));
   allData.write("\\n");
 }, 1000); // every 1 second
 `;
@@ -360,7 +360,7 @@ const btOnline = (lines) => {
       savingDataFlag = false;
     } else if (savingDataFlag) {
       const cols = line.split(',');
-      if (cols.length === 28) {
+      if (cols.length === 14) {
         bangleArray.push(cols.map((val) => Number(val)));
       }
     }
@@ -670,6 +670,7 @@ const sendData = (sessionStatus) => {
 
 // When we click the bangle connect button...
 document.getElementById('btConnect').addEventListener('click', function() {
+  console.log('bt connect');
   // disconnect if connected already
   if (connection) {
     connection.close();
@@ -698,15 +699,14 @@ document.getElementById('btConnect').addEventListener('click', function() {
     // First, reset the Bangle
     connection.write('reset();\n', function() {
       // Wait for it to reset itself
+      connection.write(`\x03\x10if(1){setTime(${Date.now()}/1000);`);
       setTimeout(function() {
         // Now upload our code to it
         //connection.write('\x03\x10if(1){'+bangleHRM+bangleGestureData+'}\n',
-        connection.write('\x03\x10if(1){'+bangleProcessedData+'}\n',
+        connection.write('\x03\x10if(1){'+bangleProcessedData+bangleRawData+'}\n',
           function() {
-            console.log('Ready...');
-            console.log('TIME STAMP to connect');
-            alert('watch connected');
             document.querySelector('#bt').classList.add('btconnected');
+            alert('watch connected');
           });
       }, 1500);
     });
