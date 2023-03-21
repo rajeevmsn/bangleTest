@@ -2,13 +2,14 @@
 /* eslint-disable max-lines */
 /* eslint-disable no-alert */
 /* global hello, config, Puck */
-/* exported connect disconnect online tokenValue userId sendData getData */
+/* exported connect disconnect previousData online tokenValue userId sendData getData displayHome guide sendAnnotations*/
 /* exported bangleGestureData bangleRawData bangleClockDisplay bangleHRM bangleHRMdisplay */
 
 //const { utils } = require('hellojs');
 
 let response;
 let bangleArray = [];
+let connection;
 
 //Writng sensor data when a sudden movement happens (acceleromter and magnetometer for now) in the csv file in bangle local memory
 const bangleGestureData =`
@@ -34,7 +35,7 @@ const bangleRawData =`
 Bangle.loadWidgets();
 Bangle.drawWidgets();
 //Bangle.setLCDBrightness(0);
-event = "connectAllData";
+event = "connectRawData";
 Bangle.setCompassPower(1);
 
 var allData = require("Storage").open(event+".csv", "a");
@@ -53,8 +54,8 @@ Bangle.on('HRM-raw', function(hrm) {
 
   //Data order in the csv
   //timestamp, accelerometer[x,y,z], magentometr [x, y, g, dx, dy, dz], hrm [raw, filter, bpm, confidence]
-    
-  allData.write([Math.floor(Date.now()),a.x, a.y,a.z,c.x,c.y,c.z,c.dx,c.dy,c.dz,hrm.raw,hrm.filt,hrm.bpm,hrm.confidence].map((o)=>parseInt(o*1000)/1000).join(","));
+  allData.write(Math.floor(Date.now()),a.x, a.y,a.z,c.x,c.y,c.z,c.dx,c.dy,c.dz,hrm.raw,hrm.filt,hrm.bpm,hrm.confidence);
+  //allData.write([Math.floor(Date.now()),a.x, a.y,a.z,c.x,c.y,c.z,c.dx,c.dy,c.dz,hrm.raw,hrm.filt,hrm.bpm,hrm.confidence].map((o)=>parseInt(o*1000)/1000).join(","));
   allData.write("\\n");
 }, 1000); // every 1 second
 `;
@@ -314,48 +315,6 @@ for (var i=0;i<2;i++) {
 }
 `;
 
-// When we click the bangle connect button...
-let connection;
-document.getElementById('btConnect').addEventListener('click', function() {
-  // disconnect if connected already
-  if (connection) {
-    connection.close(); console.log('TIME STAMP to connect');
-    sendData('sessionEnd');
-    connection = undefined;
-  }
-  // Connect
-  Puck.connect(function(c) {
-    if (!c) {
-      alert('Couldn\'t connect!');
-
-      return;
-    }
-    connection = c;
-    // Handle the data we get back, and call 'onLine'
-    // whenever we get a line
-    let buf = '';
-    connection.on('data', function(d) {
-      buf += d;
-      const l = buf.split('\n');
-      buf = l.pop();
-      l.forEach(btOnline);
-    });
-    // First, reset the Bangle
-    connection.write('reset();\n', function() {
-      // Wait for it to reset itself
-      setTimeout(function() {
-        // Now upload our code to it
-        //connection.write('\x03\x10if(1){'+bangleHRM+bangleGestureData+'}\n',
-        connection.write('\x03\x10if(1){'+bangleProcessedData+'}\n',
-          function() {
-            console.log('Ready...');
-            console.log('TIME STAMP to connect');
-            sendData('sessionBegin');
-          });
-      }, 1500);
-    });
-  });
-});
 
 //const getsend = () => {
 document.getElementById('get-send-delete').addEventListener('click', function() {
@@ -397,12 +356,11 @@ const btOnline = (lines) => {
       //localStorageObject.stream.concat(bangleArray);
       //localStorage.setItem('bangle', JSON.stringify(bangleArray));
       localStorage.bangle = JSON.stringify(localStorageObject);
-      console.log('sent');
       //bangleArray.push(line);
       savingDataFlag = false;
     } else if (savingDataFlag) {
       const cols = line.split(',');
-      if (cols.length === 28) {
+      if (cols.length === 14) {
         bangleArray.push(cols.map((val) => Number(val)));
       }
     }
@@ -412,24 +370,24 @@ const btOnline = (lines) => {
 
 const connectURL = 'https://connect-project.io';
 
-//annotate function and annotation buttons
+//if we want to send individual annotations
 const sendAnnotations = (subjectiveState) => {
   const sessionInfo = hello('connect').getAuthResponse();
   const accessToken = sessionInfo.access_token;
   //const date = new Date();
   //const currentTime = String(date.toISOString());
 
-  const sendTime = new XMLHttpRequest();
-  sendTime.open('POST', `${connectURL}/parse/classes/userSubjectivestate`);
+  const sendRequest = new XMLHttpRequest();
+  sendRequest.open('POST', `${connectURL}/parse/classes/userSubjectivestate`);
 
-  sendTime.setRequestHeader('content-type', 'application/json');
-  sendTime.setRequestHeader('x-parse-application-id', 'connect');
-  sendTime.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+  sendRequest.setRequestHeader('content-type', 'application/json');
+  sendRequest.setRequestHeader('x-parse-application-id', 'connect');
+  sendRequest.setRequestHeader('Authorization', `Bearer ${accessToken}`);
 
-  sendTime.onreadystatechange = function () {
-    if (sendTime.readyState === 4) {
-      console.log(sendTime.status);
-      console.log(sendTime.responseText);
+  sendRequest.onreadystatechange = function () {
+    if (sendRequest.readyState === 4) {
+      console.log(sendRequest.status);
+      console.log(sendRequest.responseText);
     }
   };
   const data = {
@@ -439,15 +397,141 @@ const sendAnnotations = (subjectiveState) => {
 
   const jsonData = JSON.stringify(data);
   console.log(data);
-  sendTime.send(jsonData);
+  sendRequest.send(jsonData);
 
 };
+
+//User annotation from local storage to connect
+const sendEvents=(eventsArray) => {
+  const sessionInfo = hello('connect').getAuthResponse();
+  const accessToken = sessionInfo.access_token;
+  const sendRequest = new XMLHttpRequest();
+  sendRequest.open('POST', `${connectURL}/parse/classes/userAnnotations`);
+
+  sendRequest.setRequestHeader('content-type', 'application/json');
+  sendRequest.setRequestHeader('x-parse-application-id', 'connect');
+  sendRequest.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+
+  sendRequest.onreadystatechange = function () {
+    if (sendRequest.readyState === 4) {
+      console.log(sendRequest.status);
+      console.log(sendRequest.responseText);
+    }
+  };
+
+  const data = {
+    sessionId: 'BangleTest'
+  };
+  const events =[];
+  for (let l = 0; l < eventsArray.length; l++) {
+    const a = eventsArray[l];
+    events[l] = {
+      timeStamp: a[0],
+      userAnnotation: a[1]
+    };
+  }
+  if(eventsArray.length>0) {
+    data.events = events;
+    const jsonData = JSON.stringify(data);
+    sendRequest.send(jsonData);
+  }
+
+  return eventsArray.length;
+};
+
+//bangle data (stream) from local storage to connect
+const sendStream=(stream) => {
+  const sessionInfo = hello('connect').getAuthResponse();
+  const accessToken = sessionInfo.access_token;
+  const sendRequest = new XMLHttpRequest();
+  sendRequest.open('POST', `${connectURL}/parse/classes/bangleStream`);
+
+  sendRequest.setRequestHeader('content-type', 'application/json');
+  sendRequest.setRequestHeader('x-parse-application-id', 'connect');
+  sendRequest.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+
+  sendRequest.onreadystatechange = function () {
+    if (sendRequest.readyState === 4) {
+      console.log(sendRequest.status);
+      console.log(sendRequest.responseText);
+    }
+  };
+
+  const dataBangle = {
+    sessionId: 'BangleTest'
+  };
+  const bangleStream =[];
+  const combinedstream = [];
+  let swapstream =[];
+  //To merge all arrays to a single combined array
+  for (let l = 0; l < stream.length; l++) {
+    let c = [];
+    swapstream = stream[l];
+    for (let j = 0; j < swapstream.length; j++) {
+      c = swapstream[j];
+      combinedstream.push(c);
+    }
+  }
+
+  for (let l = 0; l < combinedstream.length; l++) {
+    const a = combinedstream[l].map(Number);
+    bangleStream[l] = {
+      bufferStart: a[0],
+      bufferStop: a[1],
+      //Accelerometer and gyroscope mean values
+      // eslint-disable-next-line camelcase, object-property-newline
+      ax_M: a[2], ay_M: a[3], az_M: a[4], cx_M: a[5], cy_M: a[6], cz_M: a[7], cdx_M: a[8], cdy_M: a[9], cdz_M: a[10],
+      //Heart rate monitor mean values
+      // eslint-disable-next-line camelcase, object-property-newline
+      hrmRaw_M: a[11], hrmFilt_M: a[12], hrmBPM_M: a[13], hrmConfidence_M: a[14],
+      //Accelerometer and gyroscope standar deviation values
+      // eslint-disable-next-line camelcase, object-property-newline
+      ax_S: a[15], ay_S: a[16], az_S: a[17], cx_S: a[18], cy_S: a[19], cz_S: a[20], cdx_S: a[21], cdy_S: a[22], cdz_S: a[23],
+      //Heart rate monitor standard deviation values
+      // eslint-disable-next-line camelcase, object-property-newline
+      hrmRaw_S: a[24], hrmFilt_S: a[25], hrmBPM_S: a[26], hrmConfidence_S: a[27]
+    };
+  }
+  if(combinedstream.length>0) {
+    dataBangle.bangle = bangleStream;
+    const jsonData = JSON.stringify(dataBangle);
+    sendRequest.send(jsonData);
+  }
+
+  return combinedstream.length;
+};
+
+//Sending data from local memory to connect
+document.getElementById('get-send-delete').addEventListener('click', function() {
+
+  checkLocalStorage();
+  const {events} = localStorageObject;
+  const {stream} = localStorageObject;
+  const a = sendEvents(events);
+  const s= sendStream(stream);
+  if(a>0 && s>0) {
+    alert('Thank you! ' + s + ' rows of watch data & ' + a +' annotations are sent to connect server');
+  } else if (a>0 && s===0) {
+    alert('Thank you ' + a +' rows of annotations sent to connect server');
+  } else if (a===0 && s>0) {
+    alert('Thank you ' + s + ' rows of watch data is sent to connect server');
+  } else {
+    alert('Sorry! No data to send');
+  }
+
+});
+
+document.getElementById('viewData').addEventListener('click', function() {
+  alert('Sorry! currently we are working on dashboard, in the next version you will be use it');
+});
 
 const annotate = (subjectiveState) => {
   checkLocalStorage();
   const annotateArray = [Date.now(), subjectiveState];
   localStorageObject.events.push(annotateArray);
   localStorage.bangle = JSON.stringify(localStorageObject);
+  alert('annotation recorded');
+
 };
 
 document.getElementById('calm').addEventListener('click', function() {
@@ -459,21 +543,58 @@ document.getElementById('angry').addEventListener('click', function() {
 });
 
 document.getElementById('stress').addEventListener('click', function() {
-  annotate('stress');
+  annotate('stressed');
 });
 
 document.getElementById('happy').addEventListener('click', function() {
   annotate('happy');
 });
 
+const displayHome = () => {
+  document.querySelector('#message').classList.remove('guide');
+  document.querySelector('#message').classList.add('home');
+};
+
+const guide = () => {
+  document.querySelector('#message').classList.remove('home');
+  document.querySelector('#message').classList.add('guide');
+};
+
 const displayConnected = () => {
-  document.querySelector('#message').classList.add('connected');
-  document.querySelector('.avatar').classList.add('connected');
+  document.querySelector('#home').classList.add('connected');
+  //document.querySelector('.avatar').classList.add('connected');
 };
 
 const displayDisconnected = () => {
-  document.querySelector('.avatar').classList.remove('connected');
+  //document.querySelector('#message').classList.remove('connected');
+  //document.querySelector('.avatar').classList.remove('connected');
 };
+
+const previousData = () => {
+  document.querySelector('#home').classList.remove('sendPreviousData');
+  document.querySelector('#home').classList.add('enterPreviousData');
+};
+
+const form=document.querySelector('form');
+form.addEventListener('submit', (event) => {
+  const data = new FormData(form);
+  const output = [];
+  //let output = '';
+  let i =0;
+  for (const entry of data) {
+    output[i] = `${entry[1]}`;
+    //output[i]=entry[1];
+    i += 1;
+  }
+  console.log(output);
+  event.preventDefault();
+  document.querySelector('#home').classList.remove('enterPreviousData');
+  document.querySelector('#home').classList.add('sendPreviousData');
+},
+
+false
+);
+
 
 const connect = () => {
   hello('connect').login()
@@ -487,7 +608,7 @@ const connect = () => {
 const disconnect = () => {
   hello('connect').logout()
     .then(() => {
-      location.href = '/';
+      location.href = './index.html';
     }, (err) => {
       console.log(err);
       alert('You did not sign in :-)');
@@ -523,17 +644,17 @@ const sendData = (sessionStatus) => {
 
   const status = sessionStatus;
 
-  const sendTime = new XMLHttpRequest();
-  sendTime.open('POST', `${connectURL}/parse/classes/sessionTimestamp`);
+  const sendRequest = new XMLHttpRequest();
+  sendRequest.open('POST', `${connectURL}/parse/classes/sessionTimestamp`);
 
-  sendTime.setRequestHeader('content-type', 'application/json');
-  sendTime.setRequestHeader('x-parse-application-id', 'connect');
-  sendTime.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+  sendRequest.setRequestHeader('content-type', 'application/json');
+  sendRequest.setRequestHeader('x-parse-application-id', 'connect');
+  sendRequest.setRequestHeader('Authorization', `Bearer ${accessToken}`);
 
-  sendTime.onreadystatechange = function () {
-    if (sendTime.readyState === 4) {
-      console.log(sendTime.status);
-      console.log(sendTime.responseText);
+  sendRequest.onreadystatechange = function () {
+    if (sendRequest.readyState === 4) {
+      console.log(sendRequest.status);
+      console.log(sendRequest.responseText);
     }
   };
   const data = {
@@ -544,8 +665,64 @@ const sendData = (sessionStatus) => {
 
   const jsonData = JSON.stringify(data);
   console.log(data);
-  sendTime.send(jsonData);
+  sendRequest.send(jsonData);
 };
+
+// When we click the bangle connect button...
+document.getElementById('btConnect').addEventListener('click', function() {
+  console.log('bt connect');
+  // disconnect if connected already
+  if (connection) {
+    connection.close();
+    document.querySelector('#bt').classList.add('btdisconnected');
+    sendData('sessionEnd');
+    connection = null;
+  }
+  // Connect
+  Puck.connect(function(c) {
+    if (!c) {
+      alert('Couldn\'t connect!');
+      document.querySelector('#bt').classList.add('btdisconnected');
+
+      return;
+    }
+    connection = c;
+    // Handle the data we get back, and call 'onLine'
+    // whenever we get a line
+    let buf = '';
+    connection.on('data', function(d) {
+      buf += d;
+      const l = buf.split('\n');
+      buf = l.pop();
+      l.forEach(btOnline);
+    });
+    // First, reset the Bangle
+    connection.write('reset();\n', function() {
+      // Wait for it to reset itself
+      connection.write(`\x03\x10if(1){setTime(${Date.now()}/1000);`);
+      setTimeout(function() {
+        // Now upload our code to it
+        //connection.write('\x03\x10if(1){'+bangleHRM+bangleGestureData+'}\n',
+        connection.write('\x03\x10if(1){'+bangleProcessedData+bangleRawData+'}\n',
+          function() {
+            document.querySelector('#bt').classList.add('btconnected');
+            alert('watch connected');
+          });
+      }, 1500);
+    });
+  });
+});
+
+document.getElementById('getWatchConnect').addEventListener('click', function() {
+  if (connection) {
+    console.log('geting stream from watch');
+    bangleArray =[];
+    connection.write(`\x03\x10if(1){${getBangleData}}\n`);
+  } else {
+    document.querySelector('#bt').classList.add('btdisconnected');
+  }
+
+});
 
 const initHello = () => {
   // configure Connect network

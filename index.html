@@ -3,76 +3,89 @@
  <head>
   <title>Bangle.js data to connect</title>
   <link href="style.css" rel="stylesheet">
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="./manifest.json">
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
-  <link rel="apple-touch-icon" href="images/hello-icon-152.png">
+  <link rel="apple-touch-icon" href="images/ladybug-icon-152.png">
   <meta name="theme-color" content="white"/>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="bangleTest">
-  <meta name="msapplication-TileImage" content="images/hello-icon-144.png">
+  <meta name="apple-mobile-web-app-title" content="ladybug">
+  <meta name="msapplication-TileImage" content="images/ladybug-icon-144.png">
   <meta name="msapplication-TileColor" content="#FFFFFF">
   <meta name="theme-color" content="white"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
  </head>
  <body class="fullscreen">
     <div class="container">
-        <div id="header">
-        <!-- <a href="" onclick="signin();">Sign in</a> -->
-            <div id="profile_connect">[]</div>
-        </div>
-        <div id="content">
-            <div id="logo">
-                <svg width="42px" height="42px" transform="scale(3)">
-                    <circle class="avatar" r="20px" cx="21px" cy="21px" fill="grey"></circle>
-                    <circle r="8px" cx="21px" cy="15px" fill="#eee"></circle>
-                    <circle r="15px" cx="21px" cy="40px" fill="#eee"></circle>
-                    <circle r="20px" cx="21px" cy="21px" fill="none" stroke="grey" stroke-width="0.5px"></circle>
-                </svg>
-            </div>
         <div id="message" style="text-align: center;">
-      
-        <div id="message-disconnected">
-            You are currently not sharing data with Connect.
-            Click the button to start sharing annonymous usage data.
-            (You can stop sharing any time)<br />
+            <div id="home">
+                <button class="guide" id="userGuide" onclick="guide()"> &#10067; </button>
+                <div id="message-disconnected">
+                    <button class="button1" id="connect" onclick="connect()"> To Connect </button>
+                </div>
+                <div id="message-connected">
+                    <button class="button1" onclick="disconnect()"> To disconnect </button>
+                </div>
+                <div class="box2">
+                    <button class="button2" id="calm"> &#128524; Calm </button>
+                    <button class="button3" id="angry"> &#128545; Angry </button>
+                    <button class="button4" id="stress"> &#128534; Stressed </button>
+                    <button class="button5" id="happy"> &#128513; Happy </button>
+                </div>
+                <div id="bt">
+                    <div id="message-btconnected">
+                        <button class= "button6a" id="getWatchConnect"> &#8986; Get watch data</button>
+                    </div>
+                    <div id="message-btdisconnected">
+                        <button class= "button6a" id="btConnect"> &#8986; Connect Watch</button>
+                    </div>
+                </div>
+                <button class= "button6b" id="viewData">&#128202;  View data</button>
+                <button class= "button6c" id="get-send-delete">&#128228; Send data</button>
+                <div id="message-sendPreviousData">
+                    <button class="button7" id="pastData" onclick="previousData()"> &#128524; &#128545; &#128534; &#128513; Enter a delayed annotation &#9203; </button>
+                </div>
+                <div class="oldData" id="message-enterPreviousData">
+                    <form>
+                        <fieldset>
+                            <legend>Please enter previous data</legend>
+                            <div>
+                                <input type="radio" id="stateChoice1" name="subjectiveState" value="calm" />
+                                <label for="stateChoice1">Calm</label>
+
+                                <input type="radio" id="stateChoice2" name="subjectiveState" value="angry" />
+                                <label for="stateChoice2">Angry</label>
+
+                                <input type="radio" id="stateChoice3" name="subjectiveState" value="stress" />
+                                <label for="stateChoice3">Stressed</label>
+
+                                <input type="radio" id="stateChoice4" name="subjectiveState" value="happy" />
+                                <label for="stateChoice4">Happy</label>
+                            </div>
+                            <div>
+                                <label for="eventTime">Select date and time</label>
+                                <input id="stateTime" type="datetime-local" name="previousTime" required/>
+
+                                <button type="submit">Submit</button>
+                            </div>
+                        </fieldset>
+                    </form>
+                    <pre id="log"></pre>
+                </div>
+                
+            </div>
+
+            <div id="help">
+                <button class="button8" onclick="displayHome()"> &#10060; close </button>
+                <h3> </h3>
+                <p> </p>
+                
+            </div>
             
-            <button id="connect" onclick="connect()">
-            Connect
-            </button>
-        </div>
-        <div id="message-connected">
-            You are currently sharing data with Connect.<br />
-            To stop sharing, <a href="" onclick="disconnect()">disconnect</a>.</br>
-        
-            <button class="button2" id="calm">
-                calm
-            </button>
-            <button class="button2" id="angry">
-                angry
-            </button>
-            <button class="button2" id="stress">
-                stress
-            </button>
-            <button class="button2" id="happy">
-                happy
-            </button>
-
-            <!-- <div class="slidecontainer">
-            <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
-            </div> -->
-
-        </div>
-        <button id="btConnect">Bangle</button>
-        <button id="get-send-delete">Send Data</button>
-        
-        <!-- <button id="get-send-delete" onclick = "getsend()">Get send delete data</button> -->
-        </div>
         </div>
     </div>
 <script src="./js/main.js"></script>
 <script src="https://www.puck-js.com/puck.js"></script>
-<!-- <script src="./node_modules/hellojs/dist/hello.js"></script> -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hellojs/1.19.5/hello.js"></script>
 <script src="./config-client.js"></script>
 <script src = "./index.js"></script>
