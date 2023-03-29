@@ -14,36 +14,57 @@
   <meta name="msapplication-TileColor" content="#FFFFFF">
   <meta name="theme-color" content="white"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
  </head>
  <body class="fullscreen">
-    <div class="container">
-        <div id="message" style="text-align: center;">
-            <div id="home">
-                <button class="guide" id="userGuide" onclick="guide()"> &#10067; </button>
+    <div class="container" id="message" style="text-align: center;">
+        
+         <div id="home">
+            <!-- <button class="guide" id="userGuide" onclick="guide()"> &#10067; </button> -->
+            <nav class="navbar navbar-light" id="navhome" style="background-color: #e2dfdf;">
+               <a class="navbar-brand" href="#"><img src="./images/png/ladybug-icon-48.png"> Ladybug</a>
                 <div id="message-disconnected">
-                    <button class="button1" id="connect" onclick="connect()"> To Connect </button>
+                    <button class="btn btn-outline-secondary ml-auto" id="connect" onclick="connect()"> To Connect </button>
                 </div>
                 <div id="message-connected">
-                    <button class="button1" onclick="disconnect()"> To disconnect </button>
+                    <button class="btn btn-outline-secondary ml-auto" onclick="disconnect()"> To disconnect </button>
                 </div>
-                <div class="box2">
-                    <button class="button2" id="calm"> &#128524; Calm </button>
-                    <button class="button3" id="angry"> &#128545; Angry </button>
-                    <button class="button4" id="stress"> &#128534; Stressed </button>
-                    <button class="button5" id="happy"> &#128513; Happy </button>
-                </div>
-                <div id="bt">
-                    <div id="message-btconnected">
-                        <button class= "button6a" id="getWatchConnect"> &#8986; Get watch data</button>
+            </nav>
+
+            <div class="container-fluid">
+                <div class="row justify-content-md-center">
+                    <div class="col">
+                        <button class="btn btn-outline-primary btn-lg w-100" id="calm"> &#128524; Calm </button>
+                     </div>
+                <!-- <button class="button3" id="angry"> &#128545; Angry </button> -->
+                     <div class="col">
+                        <button class="btn btn-outline-danger btn-lg w-100" id="stress"> &#128534; Stressed </button>
                     </div>
-                    <div id="message-btdisconnected">
-                        <button class= "button6a" id="btConnect"> &#8986; Connect Watch</button>
-                    </div>
+                <!-- <button class="button5" id="happy"> &#128513; Happy </button> -->
                 </div>
-                <button class= "button6b" id="viewData">&#128202;  View data</button>
-                <button class= "button6c" id="get-send-delete">&#128228; Send data</button>
-                <div id="message-sendPreviousData">
-                    <button class="button7" id="pastData" onclick="previousData()"> &#128524; &#128545; &#128534; &#128513; Enter a delayed annotation &#9203; </button>
+            </div>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col">
+                        <div id="bt">
+                            <div id="message-btconnected">
+                                <button class= "btn btn-outline-warning btn-lg w-100" id="getWatchConnect"> &#8986; Get watch data</button>
+                            </div>
+                            <div id="message-btdisconnected">
+                                <button class= "btn btn-outline-primary btn-lg w-100" id="btConnect"> &#8986; Connect Watch</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <button class= "button6b" id="viewData">&#128202;  View data</button> -->
+                    <div class="col">
+                        <button class= "btn btn-outline-primary btn-lg w-100" id="get-send-delete">&#128228; Send data</button>
+                    </div>
+                </div> 
+            </div>
+            <div class="container-fluid">
+                <div class="row" id="message-sendPreviousData">
+                    <button class="btn btn-outline-primary btn-lg w-100" id="pastData" onclick="previousData()"> &#128524; &#128545; &#128534; &#128513; Enter a delayed annotation &#9203; </button>
                 </div>
                 <div class="oldData" id="message-enterPreviousData">
                     <form>
@@ -52,42 +73,54 @@
                             <div>
                                 <input type="radio" id="stateChoice1" name="subjectiveState" value="calm" />
                                 <label for="stateChoice1">Calm</label>
-
+<!--                                 
                                 <input type="radio" id="stateChoice2" name="subjectiveState" value="angry" />
                                 <label for="stateChoice2">Angry</label>
-
+     -->
                                 <input type="radio" id="stateChoice3" name="subjectiveState" value="stress" />
                                 <label for="stateChoice3">Stressed</label>
-
+<!--     
                                 <input type="radio" id="stateChoice4" name="subjectiveState" value="happy" />
-                                <label for="stateChoice4">Happy</label>
+                                <label for="stateChoice4">Happy</label> 
+    -->
                             </div>
                             <div>
                                 <label for="eventTime">Select date and time</label>
                                 <input id="stateTime" type="datetime-local" name="previousTime" required/>
-
+    
                                 <button type="submit">Submit</button>
                             </div>
                         </fieldset>
                     </form>
                     <pre id="log"></pre>
                 </div>
-                
             </div>
-
-            <div id="help">
-                <button class="button8" onclick="displayHome()"> &#10060; close </button>
-                <h3> </h3>
-                <p> </p>
                 
-            </div>
-            
         </div>
+
+        <nav class="navbar fixed-bottom navbar-light" style="background-color: #e9e9e99d;">
+            <div class="container d-flex justify-content-center">
+                <div class ="col d-flex justify-content-center">
+                    <button class="nav-link btn btn-link" onclick="goToScreen('guide')"><img src="./images/png/help_FILL0_wght300_GRAD0_opsz48.png"></button>
+                </div>
+                <div class ="col d-flex justify-content-center">
+                    <button class="nav-link btn btn-link" onclick="goToScreen('index')"><img src="./images/png/home_FILL0_wght300_GRAD0_opsz48.png"></button>
+                </div>
+                <div class ="col d-flex justify-content-md-center">
+                    <button class="nav-link btn btn-link" onclick="goToScreen('viewData')"><img src="./images/png/bar_chart_FILL0_wght300_GRAD0_opsz48.png"></button>
+                </div>
+            </div>
+        </nav>
+            
     </div>
 <script src="./js/main.js"></script>
 <script src="https://www.puck-js.com/puck.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hellojs/1.19.5/hello.js"></script>
 <script src="./config-client.js"></script>
 <script src = "./index.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 </html>

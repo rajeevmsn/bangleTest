@@ -1,108 +1,46 @@
-* {
-    font-family: sans-serif;
-    font-size: calc(.5em + 1vw);
-}
-
-html,
-.fullscreen{
-    display: flex;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-}
-
 .container {
-    margin: auto;
     text-align: center;
+    top: 95%;
+    gap: 10px;
+    row-gap: 10px;
+    column-gap: 10px;
 }
 
-.oldData{
-    position: absolute;
-    top: 80%
-}
-  
-#header>* {
-    float: right;
-}
-
-/* #content,
-#logo,
-#message {
-    
-    top: 10%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.container-fluid {
+    display: grid;
+	margin-top: 100px;
+	margin-bottom: 50px;
+    gap: 15px;
+    row-gap: 10px;
 }
 
-#message {
-    top: 10%;
-    width: 350px;
-    color: #555;
-} */
-
-/* #content {
-    width: 90%;
-    height: 50%;
-    background: #eee;
+.navbar {
+	top: 85%;
 }
 
-#logo {
-    top: 25%;
-    font-size: 96px;
-} */
-button {
-    
-    width: 20%;
-    height: 50px;
-    background: #89c;
-    border: thin solid #999;
-    color: white;
-    font-size: 1.2rem;
-    border-radius: 48px;
-    margin-top: 1.5rem;
+.container:last-child {
+	margin-bottom: 100px;
 }
 
-button:hover {
-    background: #67a;
+.annotateDetails{
+    display:none;
 }
-
-legend {
-    color: white;
-    background-color: black;
-    padding: 5px 10px;
-    border-radius: 0;
-    border: 0;
-    font-size: 14px;
-  }
-
-/*Swap between home and help */
-#message.home > #home {
-    display: block;
-}
-#message.home > #help {
-    display: none;
-}
-
-#message.guide > #home {
-    display: none;
-}
-#message.guide > #help {
-    display: block;
+#radio-buttons{
+    display:none;
 }
 
 /*Swap between connect and disconnect buttons*/
-#home.connected > #message-connected {
+#navhome.connected > #message-connected {
     display: block;
 }
-#home.connected > #message-disconnected {
+#navhome.connected > #message-disconnected {
     display: none;
 }
 
-#home:not(.connected) > #message-connected {
+#navhome:not(.connected) > #message-connected {
     display: none;
 }
-#home:not(.connected) > #message-disconnected {
+#navhome:not(.connected) > #message-disconnected {
     display: block;
 }
 
@@ -137,96 +75,13 @@ legend {
     display: block;
 }
 
-/* .avatar {
-    fill: grey;
-}
-
-.avatar.connected {
-    fill: #1c1;
-} */
-.button1{
-    position:absolute;
-    top: 5px;
-    right: 5%;
-}
-.guide{
-    position:absolute;
-    top: 5px;
-    left: 5%;
-    height: 48px;
-    width: 48px;
-    border-radius: 50%;
-    background-color: rgb(227, 227, 227);
-    border: none;
-}
-.box2{
-    position:absolute;
-    top: 15%;
-    left: 5%;
-    width: 90%;
-    height: 40%;
-    border-radius: 48px;
-    background: rgb(226, 225, 225); 
-}
-.button2{
-    position: absolute;
-    top: 5%;
-    left:25%;
-    width: 50%;
-}
-.button3{
-    position: absolute;
-    top: 25%;
-    left:25%;
-    width: 50%;
-}
-.button4{
-    position: absolute;
-    top: 45%;
-    left: 25%;
-    width: 50%;
-}
-.button5{
-    position: absolute;
-    top: 65%;
-    left: 25%;
-    width: 50%;
-}
-.button6a{
-    position:absolute;
-    top: 65%;
-    left: 5%;
-    width: 25%;
-}
-.button6b{
-    position:absolute;
-    top: 65%;
-    left: 37.5%;
-    width: 25%;
-}
-.button6c{
-    position:absolute;
-    top: 65%;
-    right:5%;
-    width: 25%;
-}
 .button7{
-    position: absolute;
-    top: 75%;
-    left: 5%;
+    
     width: 90%;
 }
 .oldData{
-    position: absolute;
-    top: 75%;
     left: 5%;
     width: 90%;
     height: 20%;
     font-size: calc(.25em + .5vw);
-}
-.button8{
-    top: 5%;
-    right: 5%;
-    height: 48px;
-    width: 48px;
 }
