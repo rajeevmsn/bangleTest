@@ -521,9 +521,9 @@ document.getElementById('get-send-delete').addEventListener('click', function() 
 
 });
 
-document.getElementById('viewData').addEventListener('click', function() {
-  alert('Sorry! currently we are working on dashboard, in the next version you will be use it');
-});
+// document.getElementById('viewData').addEventListener('click', function() {
+//   alert('Sorry! currently we are working on dashboard, in the next version you will be use it');
+// });
 
 const annotate = (subjectiveState) => {
   checkLocalStorage();
@@ -538,27 +538,27 @@ document.getElementById('calm').addEventListener('click', function() {
   annotate('calm');
 });
 
-document.getElementById('angry').addEventListener('click', function() {
-  annotate('angry');
-});
+// document.getElementById('angry').addEventListener('click', function() {
+//   annotate('angry');
+// });
 
 document.getElementById('stress').addEventListener('click', function() {
   annotate('stressed');
 });
 
-document.getElementById('happy').addEventListener('click', function() {
-  annotate('happy');
-});
+// document.getElementById('happy').addEventListener('click', function() {
+//   annotate('happy');
+// });
 
 const displayHome = () => {
   document.querySelector('#message').classList.remove('guide');
   document.querySelector('#message').classList.add('home');
 };
 
-const guide = () => {
-  document.querySelector('#message').classList.remove('home');
-  document.querySelector('#message').classList.add('guide');
-};
+// const guide = () => {
+//   document.querySelector('#message').classList.remove('home');
+//   document.querySelector('#message').classList.add('guide');
+// };
 
 const displayConnected = () => {
   document.querySelector('#home').classList.add('connected');
