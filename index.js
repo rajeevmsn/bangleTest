@@ -34,12 +34,13 @@ Bangle.on('gesture',gotGesture);
 const bangleRawData =`
 Bangle.loadWidgets();
 Bangle.drawWidgets();
-//Bangle.setLCDBrightness(0);
+Bangle.setLCDBrightness(0);
 event = "connectRawData";
 Bangle.setCompassPower(1);
 
 var allData = require("Storage").open(event+".csv", "a");
 Bangle.setHRMPower(1);
+var timePast = Date.now();
 
 Bangle.on('HRM-raw', function(hrm) {
   var hrmRaw = [
@@ -54,10 +55,11 @@ Bangle.on('HRM-raw', function(hrm) {
 
   //Data order in the csv
   //timestamp, accelerometer[x,y,z], magentometr [x, y, g, dx, dy, dz], hrm [raw, filter, bpm, confidence]
-  allData.write(Math.floor(Date.now()),a.x, a.y,a.z,c.x,c.y,c.z,c.dx,c.dy,c.dz,hrm.raw,hrm.filt,hrm.bpm,hrm.confidence);
-  //allData.write([Math.floor(Date.now()),a.x, a.y,a.z,c.x,c.y,c.z,c.dx,c.dy,c.dz,hrm.raw,hrm.filt,hrm.bpm,hrm.confidence].map((o)=>parseInt(o*1000)/1000).join(","));
+  if(Date.now()-timePast>1000){
+  allData.write([Math.floor(Date.now()),a.x, a.y,a.z,c.x,c.y,c.z,c.dx,c.dy,c.dz,hrm.raw,hrm.filt,hrm.bpm,hrm.confidence].map((o)=>parseInt(o*1000)/1000).join(","));
   allData.write("\\n");
-}, 1000); // every 1 second
+  timePast = Date.now();}
+}); // every 1 second
 `;
 const bangleClockDisplay = `
 // Load fonts
@@ -210,11 +212,11 @@ g.drawImage(img, 50,50);
 
 const getBangleData = `
 //getting Data
-const getBangle = require('Storage').read('connectAllData.csv\\1');
+const getBangle = require('Storage').read('connectRawData.csv\\1');
 //Sending Data
 Bluetooth.println("<data>\\n"+getBangle+"\\n</data>");
 //Removing Data
-require("Storage").erase('connectAllData.csv\\1');
+require("Storage").erase('connectRawData.csv\\1');
 
 //var array = getBangle.split("\\n");
 //Bluetooth.println(array);
@@ -477,19 +479,19 @@ const sendStream=(stream) => {
     const a = combinedstream[l].map(Number);
     bangleStream[l] = {
       bufferStart: a[0],
-      bufferStop: a[1],
+      //bufferStop: a[1],
       //Accelerometer and gyroscope mean values
       // eslint-disable-next-line camelcase, object-property-newline
-      ax_M: a[2], ay_M: a[3], az_M: a[4], cx_M: a[5], cy_M: a[6], cz_M: a[7], cdx_M: a[8], cdy_M: a[9], cdz_M: a[10],
+      ax_M: a[1], ay_M: a[2], az_M: a[3], cx_M: a[4], cy_M: a[5], cz_M: a[6], cdx_M: a[7], cdy_M: a[8], cdz_M: a[9],
       //Heart rate monitor mean values
       // eslint-disable-next-line camelcase, object-property-newline
-      hrmRaw_M: a[11], hrmFilt_M: a[12], hrmBPM_M: a[13], hrmConfidence_M: a[14],
+      hrmRaw_M: a[10], hrmFilt_M: a[11], hrmBPM_M: a[12], hrmConfidence_M: a[13]
       //Accelerometer and gyroscope standar deviation values
       // eslint-disable-next-line camelcase, object-property-newline
-      ax_S: a[15], ay_S: a[16], az_S: a[17], cx_S: a[18], cy_S: a[19], cz_S: a[20], cdx_S: a[21], cdy_S: a[22], cdz_S: a[23],
+      // ax_S: a[15], ay_S: a[16], az_S: a[17], cx_S: a[18], cy_S: a[19], cz_S: a[20], cdx_S: a[21], cdy_S: a[22], cdz_S: a[23],
       //Heart rate monitor standard deviation values
       // eslint-disable-next-line camelcase, object-property-newline
-      hrmRaw_S: a[24], hrmFilt_S: a[25], hrmBPM_S: a[26], hrmConfidence_S: a[27]
+      // hrmRaw_S: a[24], hrmFilt_S: a[25], hrmBPM_S: a[26], hrmConfidence_S: a[27]
     };
   }
   if(combinedstream.length>0) {
@@ -511,6 +513,7 @@ document.getElementById('get-send-delete').addEventListener('click', function() 
   const s= sendStream(stream);
   if(a>0 && s>0) {
     alert('Thank you! ' + s + ' rows of watch data & ' + a +' annotations are sent to connect server');
+    //function to clear local storage
   } else if (a>0 && s===0) {
     alert('Thank you ' + a +' rows of annotations sent to connect server');
   } else if (a===0 && s>0) {
@@ -703,7 +706,7 @@ document.getElementById('btConnect').addEventListener('click', function() {
       setTimeout(function() {
         // Now upload our code to it
         //connection.write('\x03\x10if(1){'+bangleHRM+bangleGestureData+'}\n',
-        connection.write('\x03\x10if(1){'+bangleProcessedData+bangleRawData+'}\n',
+        connection.write('\x03\x10if(1){'+bangleRawData+'}\n',
           function() {
             document.querySelector('#bt').classList.add('btconnected');
             alert('watch connected');
