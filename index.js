@@ -55,7 +55,7 @@ Bangle.on('HRM-raw', function(hrm) {
 
   //Data order in the csv
   //timestamp, accelerometer[x,y,z], magentometr [x, y, g, dx, dy, dz], hrm [raw, filter, bpm, confidence]
-  if(Date.now()-timePast>1000){
+  if(Date.now()-timePast>1000 & hrm.confidence>19){
   allData.write([Math.floor(Date.now()),a.x, a.y,a.z,c.x,c.y,c.z,c.dx,c.dy,c.dz,hrm.raw,hrm.filt,hrm.bpm,hrm.confidence].map((o)=>parseInt(o*1000)/1000).join(","));
   allData.write("\\n");
   timePast = Date.now();}
@@ -217,6 +217,7 @@ const getBangle = require('Storage').read('connectRawData.csv\\1');
 Bluetooth.println("<data>\\n"+getBangle+"\\n</data>");
 //Removing Data
 require("Storage").erase('connectRawData.csv\\1');
+require("Storage").open("connectRawData.csv", "w");
 
 //var array = getBangle.split("\\n");
 //Bluetooth.println(array);
