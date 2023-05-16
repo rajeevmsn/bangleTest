@@ -579,6 +579,14 @@ const previousData = () => {
   document.querySelector('#home').classList.add('enterPreviousData');
 };
 
+const oldannotate = (subjectiveState) => {
+  checkLocalStorage();
+  const annotateArray = [Date.parse(subjectiveState[1]), subjectiveState[0]];
+  localStorageObject.events.push(annotateArray);
+  localStorage.bangle = JSON.stringify(localStorageObject);
+  alert('old annotation recorded');
+};
+
 const form=document.querySelector('form');
 form.addEventListener('submit', (event) => {
   const data = new FormData(form);
@@ -586,11 +594,9 @@ form.addEventListener('submit', (event) => {
   let i =0;
   for (const entry of data) {
     output[i] = `${entry[1]}`;
-    //output[i]=entry[1];
     i += 1;
   }
-  //console.log(output);
-  annotate(output[0]);
+  oldannotate(output);
   event.preventDefault();
   document.querySelector('#home').classList.remove('enterPreviousData');
   document.querySelector('#home').classList.add('sendPreviousData');
