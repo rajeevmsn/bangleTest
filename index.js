@@ -583,14 +583,14 @@ const form=document.querySelector('form');
 form.addEventListener('submit', (event) => {
   const data = new FormData(form);
   const output = [];
-  //let output = '';
   let i =0;
   for (const entry of data) {
     output[i] = `${entry[1]}`;
     //output[i]=entry[1];
     i += 1;
   }
-  console.log(output);
+  //console.log(output);
+  annotate(output[0]);
   event.preventDefault();
   document.querySelector('#home').classList.remove('enterPreviousData');
   document.querySelector('#home').classList.add('sendPreviousData');
