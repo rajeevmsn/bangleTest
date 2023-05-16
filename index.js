@@ -349,6 +349,7 @@ let savingDataFlag = false;
 const btOnline = (lines) => {
   // const d = lines.split('\n');
   checkLocalStorage();
+  let count = 0;
 
   for (const line of lines.split('\n')) {
     if (line.match('<data>')) {
@@ -367,8 +368,9 @@ const btOnline = (lines) => {
         bangleArray.push(cols.map((val) => Number(val)));
       }
     }
+    count+=1;
   }
-
+  alert('received ' + count +' rows of data from watch');
 };
 
 const connectURL = 'https://connect-project.io';
