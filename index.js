@@ -214,7 +214,15 @@ const getBangleData = `
 //getting Data
 const getBangle = require('Storage').read('connectRawData.csv\\1');
 //Sending Data
-Bluetooth.println("<data>\\n"+getBangle+"\\n</data>");
+var array = getBangle.split("\\n");
+var d =0;
+while(d<=array.length)
+{
+  if(d%50>48){
+Bluetooth.println("<data>\\n"+array[d]+"\\n</data>");
+d+=1;}
+}
+Bluetooth.println("<data>\\n"+array[d]+"\\n</data>");
 //Removing Data
 require("Storage").erase('connectRawData.csv\\1');
 require("Storage").open("connectRawData.csv", "w");
