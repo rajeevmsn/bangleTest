@@ -3,13 +3,14 @@
 /* eslint-disable no-alert */
 /* global hello, config, Puck */
 /* exported connect disconnect previousData online tokenValue userId sendData getData displayHome guide sendAnnotations*/
-/* exported bangleGestureData bangleRawData bangleClockDisplay bangleHRM bangleHRMdisplay */
+/* exported bangleGestureData bangleRawData bangleClockDisplay bangleHRM bangleHRMdisplay bangleProcessedData */
 
 //const { utils } = require('hellojs');
 
 let response;
 let bangleArray = [];
 let connection;
+let sendKey; //to Only send data when connected
 
 //Writng sensor data when a sudden movement happens (acceleromter and magnetometer for now) in the csv file in bangle local memory
 const bangleGestureData =`
@@ -333,8 +334,9 @@ for (var i=0;i<2;i++) {
 document.getElementById('get-send-delete').addEventListener('click', function() {
 
   bangleArray =[];
-  //console.log('Sent');
-  connection.write(`\x03\x10if(1){${getBangleData}}\n`);
+  if(connection) { //only get bangle data if connected
+    connection.write(`\x03\x10if(1){${getBangleData}}\n`);
+  }
 });
 
 // Get localStorage data if any, or initialize the localStorageObject
@@ -343,7 +345,6 @@ let localStorageObject;
 const checkLocalStorage = () => {
   if (localStorage.bangle) {
     localStorageObject = JSON.parse(localStorage.bangle);
-    alert('received data from watch');
   } else {
     localStorageObject = {
       stream: [],
@@ -354,8 +355,7 @@ const checkLocalStorage = () => {
 };
 
 
-// When we get a line of data, check it and if it's
-// from the accelerometer, update it
+// When we get a line of data from bangle, check it and update it to stream in localStorageObject
 let savingDataFlag = false;
 const btOnline = (lines) => {
   // const d = lines.split('\n');
@@ -462,6 +462,7 @@ const sendStream=(stream) => {
   sendRequest.setRequestHeader('content-type', 'application/json');
   sendRequest.setRequestHeader('x-parse-application-id', 'connect');
   sendRequest.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+  let c = 0;
 
   sendRequest.onreadystatechange = function () {
     if (sendRequest.readyState === 4) {
@@ -516,21 +517,26 @@ const sendStream=(stream) => {
 
 //Sending data from local memory to connect
 document.getElementById('get-send-delete').addEventListener('click', function() {
-
-  checkLocalStorage();
-  const {events} = localStorageObject;
-  const {stream} = localStorageObject;
-  const a = sendEvents(events);
-  const s= sendStream(stream);
-  if(a>0 && s>0) {
-    alert('Thank you! ' + s + ' rows of watch data & ' + a +' annotations are sent to connect server');
-    //function to clear local storage
-  } else if (a>0 && s===0) {
-    alert('Thank you ' + a +' rows of annotations sent to connect server');
-  } else if (a===0 && s>0) {
-    alert('Thank you ' + s + ' rows of watch data is sent to connect server');
+  if(sendKey>0) {
+    checkLocalStorage();
+    const {events} = localStorageObject;
+    const {stream} = localStorageObject;
+    const a = sendEvents(events);
+    const s= sendStream(stream);
+    if(a>0 && s>0) {
+      alert('Thank you! ' + s + ' rows of watch data & ' + a +' annotations are sent to connect server');
+      localStorage.clear();
+    } else if (a>0 && s===0) {
+      alert('Thank you ' + a +' rows of annotations sent to connect server');
+      localStorage.clear();
+    } else if (a===0 && s>0) {
+      alert('Thank you ' + s + ' rows of watch data is sent to connect server');
+      localStorage.clear();
+    } else {
+      alert('Sorry! No data to send');
+    }
   } else {
-    alert('Sorry! No data to send');
+    alert('Please connect to send data');
   }
 
 });
@@ -545,7 +551,6 @@ const annotate = (subjectiveState) => {
   localStorageObject.events.push(annotateArray);
   localStorage.bangle = JSON.stringify(localStorageObject);
   alert('annotation recorded');
-
 };
 
 document.getElementById('calm').addEventListener('click', function() {
@@ -620,6 +625,7 @@ const connect = () => {
   hello('connect').login()
     .then((res) => {
       response = res;
+      sendKey = 1;
       console.log(response);
       displayConnected();
     });
@@ -629,6 +635,7 @@ const disconnect = () => {
   hello('connect').logout()
     .then(() => {
       location.href = './index.html';
+      sendKey = 0;
     }, (err) => {
       console.log(err);
       alert('You did not sign in :-)');
