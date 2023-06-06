@@ -32,6 +32,7 @@ Bangle.on('gesture',gotGesture);
 `;
 //Writng sensor data (acceleromter and magnetometer for now) in the csv file in bangle local memory
 const bangleRawData =`
+g.clear();
 Bangle.loadWidgets();
 Bangle.drawWidgets();
 Bangle.setLCDBrightness(0);
@@ -39,6 +40,7 @@ event = "connectRawData";
 Bangle.setCompassPower(1);
 
 var allData = require("Storage").open(event+".csv", "a");
+var mem = require("Storage").getFree();
 Bangle.setHRMPower(1);
 var timePast = Date.now();
 
@@ -55,11 +57,19 @@ Bangle.on('HRM-raw', function(hrm) {
 
   //Data order in the csv
   //timestamp, accelerometer[x,y,z], magentometr [x, y, g, dx, dy, dz], hrm [raw, filter, bpm, confidence]
-  if(Date.now()-timePast>1000 & hrm.confidence>19){
-  allData.write([Math.floor(Date.now()),a.x, a.y,a.z,c.x,c.y,c.z,c.dx,c.dy,c.dz,hrm.raw,hrm.filt,hrm.bpm,hrm.confidence].map((o)=>parseInt(o*1000)/1000).join(","));
-  allData.write("\\n");
-  timePast = Date.now();}
-}); // every 1 second
+  var line = [Math.floor(Date.now()),a.x,a.y,a.z,c.x,c.y,c.z,c.dx,c.dy,c.dz,hrm.raw,hrm.filt,hrm.bpm,hrm.confidence].map((o)=>parseInt(o*1000)/1000).join(",")+"\\n";
+  mem = mem - line.length;
+  if(Date.now()-timePast>100){
+    if(mem > 750000){
+      g.clear();
+      //1000000 Bytes = 1 MB (in decimal)
+      allData.write("line");
+    }
+    else {
+      g.drawString("MemoryFull",50, 50);
+    }
+    timePast = Date.now();}
+}); // 10 times a second
 `;
 const bangleClockDisplay = `
 // Load fonts
