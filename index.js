@@ -222,23 +222,15 @@ g.drawImage(img, 50,50);
 
 const getBangleData = `
 //getting Data
-const getBangle = require('Storage').read('connectRawData.csv\\1');
-//Sending Data
-var array = getBangle.split("\\n");
-var d =0;
-while(d<=array.length)
-{
-  if(d%50>48){
-Bluetooth.println("<data>\\n"+array[d]+"\\n</data>");
-d+=1;}
+const getBangle = require('Storage').open('connectRawData.csv', 'r');
+var array = getBangle.readLine();
+while (array != undefined) {
+  Bluetooth.println("<data>\\n"+array+"\\n</data>");
+  array = getBangle.readLine();
 }
-Bluetooth.println("<data>\\n"+array[d]+"\\n</data>");
 //Removing Data
-require("Storage").erase('connectRawData.csv\\1');
+getBangle.erase();
 require("Storage").open("connectRawData.csv", "w");
-
-//var array = getBangle.split("\\n");
-//Bluetooth.println(array);
 `;
 
 //for HRM display on bangle screen
