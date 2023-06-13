@@ -64,7 +64,7 @@ Bangle.on('HRM-raw', function(hrm) {
     if(mem > 750000){
       g.clear();
       //1000000 Bytes = 1 MB (in decimal)
-      allData.write("line");
+      allData.write(line);
     }
     else {
       g.drawString("MemoryFull",50, 50);
