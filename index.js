@@ -159,15 +159,22 @@ g.drawImage(img, 50,50);
 
 const getBangleData = `
 //getting Data
+flag =0;
 const getBangle = require('Storage').open('connectRawData.csv', 'r');
 var array = getBangle.readLine();
+g.clear();
+g.setFont("Vector:30").setFontAlign(0,0);
+g.drawString("Sending",50, 50);
 while (array != undefined) {
   Bluetooth.println("<data>\\n"+array+"\\n</data>");
   array = getBangle.readLine();
+  g.drawString("Sending",50, 50);
 }
 //Removing Data
+g.clear();
 getBangle.erase();
-require("Storage").open("connectRawData.csv", "w");
+var allData = require("Storage").open("connectRawData.csv", "w");
+flag=1;
 `;
 
 let messageFlag = false;
