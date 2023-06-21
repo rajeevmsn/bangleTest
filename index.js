@@ -11,6 +11,8 @@ let response;
 let bangleArray = [];
 let connection;
 let sendKey; //to Only send data when connected
+let receiveStream = 0;
+let receiveAnnotation = 0;
 
 //Writng sensor data when a sudden movement happens (acceleromter and magnetometer for now) in the csv file in bangle local memory
 const bangleGestureData =`
@@ -34,6 +36,7 @@ Bangle.on('gesture',gotGesture);
 //Writng sensor data (acceleromter and magnetometer for now) in the csv file in bangle local memory
 const bangleRawData =`
 g.clear();
+g.setFont("Vector:30").setFontAlign(0,0);
 Bangle.loadWidgets();
 Bangle.drawWidgets();
 Bangle.setLCDBrightness(0);
@@ -42,6 +45,7 @@ Bangle.setCompassPower(1);
 
 var allData = require("Storage").open(event+".csv", "a");
 var mem = require("Storage").getFree();
+var flag =1;
 Bangle.setHRMPower(1);
 var timePast = Date.now();
 
@@ -60,13 +64,14 @@ Bangle.on('HRM-raw', function(hrm) {
   //timestamp, accelerometer[x,y,z], magentometr [x, y, g, dx, dy, dz], hrm [raw, filter, bpm, confidence]
   var line = [Math.floor(Date.now()),a.x,a.y,a.z,c.x,c.y,c.z,c.dx,c.dy,c.dz,hrm.raw,hrm.filt,hrm.bpm,hrm.confidence].map((o)=>parseInt(o*1000)/1000).join(",")+"\\n";
   mem = mem - line.length;
-  if(Date.now()-timePast>100){
-    if(mem > 750000){
+  if(Date.now()-timePast>100 & flag>0){
+    if(mem > 650000){
       g.clear();
       //1000000 Bytes = 1 MB (in decimal)
       allData.write(line);
     }
     else {
+      var mem = require("Storage").getFree();
       g.drawString("MemoryFull",50, 50);
     }
     timePast = Date.now();}
@@ -260,136 +265,145 @@ const sendAnnotations = (subjectiveState) => {
 
 };
 
-//User annotation from local storage to connect
-const sendEvents=(eventsArray) => {
+
+const sendEvents = async (eventsArray) => {
   const sessionInfo = hello('connect').getAuthResponse();
   const accessToken = sessionInfo.access_token;
-  const sendRequest = new XMLHttpRequest();
-  sendRequest.open('POST', `${connectURL}/parse/classes/userAnnotations`);
 
-  sendRequest.setRequestHeader('content-type', 'application/json');
-  sendRequest.setRequestHeader('x-parse-application-id', 'connect');
-  sendRequest.setRequestHeader('Authorization', `Bearer ${accessToken}`);
-
-  sendRequest.onreadystatechange = function () {
-    if (sendRequest.readyState === 4) {
-      console.log(sendRequest.status);
-      console.log(sendRequest.responseText);
-    }
+  const url = `${connectURL}/parse/classes/userAnnotations`;
+  const headers = {
+    'Content-Type': 'application/json',
+    'x-parse-application-id': 'connect',
+    'Authorization': `Bearer ${accessToken}`
   };
 
   const data = {
     sessionId: 'BangleTest'
   };
-  const events =[];
-  for (let l = 0; l < eventsArray.length; l++) {
-    const a = eventsArray[l];
-    events[l] = {
-      timeStamp: a[0],
-      userAnnotation: a[1]
-    };
-  }
-  if(eventsArray.length>0) {
+
+  const events = eventsArray.map((a) => ({
+    timeStamp: a[0],
+    userAnnotation: a[1]
+  }));
+
+  if (eventsArray.length > 0) {
     data.events = events;
     const jsonData = JSON.stringify(data);
-    sendRequest.send(jsonData);
+
+    try {
+      const responseA = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: jsonData
+      });
+
+      console.log(responseA.status);
+      receiveAnnotation = responseA.status;
+      console.log(await responseA.text());
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   return eventsArray.length;
 };
 
-//bangle data (stream) from local storage to connect
-const sendStream=(stream) => {
+const sendStream = async (stream) => {
   const sessionInfo = hello('connect').getAuthResponse();
   const accessToken = sessionInfo.access_token;
-  const sendRequest = new XMLHttpRequest();
-  sendRequest.open('POST', `${connectURL}/parse/classes/bangleStream`);
+  //const connectURL = 'YOUR_CONNECT_URL'; // Replace with your actual connect URL
 
-  sendRequest.setRequestHeader('content-type', 'application/json');
-  sendRequest.setRequestHeader('x-parse-application-id', 'connect');
-  sendRequest.setRequestHeader('Authorization', `Bearer ${accessToken}`);
-  let c = 0;
+  const batchSize = 1000; // Number of lines to send in each batch
+  const totalLines = stream.length;
+  const batchCount = Math.ceil(totalLines / batchSize);
+  let sentCount = 0;
 
-  sendRequest.onreadystatechange = function () {
-    if (sendRequest.readyState === 4) {
-      console.log(sendRequest.status);
-      console.log(sendRequest.responseText);
+  for (let i = 0; i < batchCount; i++) {
+    console.log('batch:'+i);
+    const start = i * batchSize;
+    const end = Math.min(start + batchSize, totalLines);
+    const batchStream = stream.slice(start, end);
+
+    const bangleStream = [];
+    for (let l = 0; l < batchStream.length; l++) {
+      const a = batchStream[l].map(Number);
+      bangleStream[l] = {
+        bufferStart: a[0],
+        // eslint-disable-next-line camelcase, object-property-newline
+        ax_M: a[1], ay_M: a[2], az_M: a[3], cx_M: a[4], cy_M: a[5], cz_M: a[6], cdx_M: a[7], cdy_M: a[8], cdz_M: a[9],
+        // eslint-disable-next-line camelcase, object-property-newline
+        hrmRaw_M: a[10], hrmFilt_M: a[11], hrmBPM_M: a[12], hrmConfidence_M: a[13]
+      };
     }
-  };
 
-  const dataBangle = {
-    sessionId: 'BangleTest'
-  };
-  const bangleStream =[];
-  const combinedstream = [];
-  let swapstream =[];
-  //To merge all arrays to a single combined array
-  for (let l = 0; l < stream.length; l++) {
-    let c = [];
-    swapstream = stream[l];
-    for (let j = 0; j < swapstream.length; j++) {
-      c = swapstream[j];
-      combinedstream.push(c);
+    if (bangleStream.length > 0) {
+      const dataBangle = {
+        sessionId: 'BangleTest',
+        bangle: bangleStream
+      };
+
+      const sendRequest = new XMLHttpRequest();
+      sendRequest.open('POST', `${connectURL}/parse/classes/bangleStream`);
+      sendRequest.setRequestHeader('Content-Type', 'application/json');
+      sendRequest.setRequestHeader('X-Parse-Application-Id', 'connect');
+      sendRequest.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+
+      sendRequest.onreadystatechange = function () {
+        if (sendRequest.readyState === 4) {
+          console.log(sendRequest.status);
+          //receiveStream = sendRequest.status;
+          console.log(sendRequest.responseText);
+          console.log(Response.status);
+        }
+      };
+
+      const jsonData = JSON.stringify(dataBangle);
+      sendRequest.send(jsonData);
+      sentCount += bangleStream.length;
     }
   }
+  console.log('sent:'+sentCount);
 
-  for (let l = 0; l < combinedstream.length; l++) {
-    const a = combinedstream[l].map(Number);
-    bangleStream[l] = {
-      bufferStart: a[0],
-      //bufferStop: a[1],
-      //Accelerometer and gyroscope mean values
-      // eslint-disable-next-line camelcase, object-property-newline
-      ax_M: a[1], ay_M: a[2], az_M: a[3], cx_M: a[4], cy_M: a[5], cz_M: a[6], cdx_M: a[7], cdy_M: a[8], cdz_M: a[9],
-      //Heart rate monitor mean values
-      // eslint-disable-next-line camelcase, object-property-newline
-      hrmRaw_M: a[10], hrmFilt_M: a[11], hrmBPM_M: a[12], hrmConfidence_M: a[13]
-      //Accelerometer and gyroscope standar deviation values
-      // eslint-disable-next-line camelcase, object-property-newline
-      // ax_S: a[15], ay_S: a[16], az_S: a[17], cx_S: a[18], cy_S: a[19], cz_S: a[20], cdx_S: a[21], cdy_S: a[22], cdz_S: a[23],
-      //Heart rate monitor standard deviation values
-      // eslint-disable-next-line camelcase, object-property-newline
-      // hrmRaw_S: a[24], hrmFilt_S: a[25], hrmBPM_S: a[26], hrmConfidence_S: a[27]
-    };
-  }
-  if(combinedstream.length>0) {
-    dataBangle.bangle = bangleStream;
-    const jsonData = JSON.stringify(dataBangle);
-    sendRequest.send(jsonData);
-  }
-
-  return combinedstream.length;
+  return sentCount;
 };
 
+
 //Sending data from local memory to connect
-document.getElementById('get-send-delete').addEventListener('click', function() {
-  if(sendKey>0) {
+
+document.getElementById('get-send-delete').addEventListener('click', async function() {
+  if (sendKey > 0) {
     checkLocalStorage();
-    const {events} = localStorageObject;
-    const {stream} = localStorageObject;
-    const a = sendEvents(events);
-    const s= sendStream(stream);
-    if(a>0 && s>0) {
-      alert('Thank you! ' + s + ' rows of watch data & ' + a +' annotations are sent to connect server');
+    const { events } = localStorageObject;
+    const { stream } = localStorageObject;
+
+    const aPromise = sendEvents(events);
+    const sPromise = sendStream(stream);
+
+    const [a, s] = await Promise.all([aPromise, sPromise]);
+
+    if (a > 0 && s > 0) {
+      alert('Thank you! ' + s + ' rows of watch data & ' + a + ' annotations are sent to the connect server');
       localStorage.clear();
-    } else if (a>0 && s===0) {
-      alert('Thank you ' + a +' rows of annotations sent to connect server');
+      checkLocalStorage();
+      receiveStream = 0;
+    } else if (a > 0 && s === 0) {
+      alert('Thank you ' + a + ' rows of annotations sent to the connect server');
       localStorage.clear();
-    } else if (a===0 && s>0) {
-      alert('Thank you ' + s + ' rows of watch data is sent to connect server');
+      checkLocalStorage();
+      receiveAnnotation = 0;
+    } else if (a === 0 && s > 0) {
+      alert('Thank you ' + s + ' rows of watch data are sent to the connect server');
       localStorage.clear();
+      checkLocalStorage();
+      receiveStream = 0;
     } else {
-      alert('Sorry! No data to send');
+      alert('Sorry! Please try again');
     }
   } else {
-    alert('Please connect to send data');
+    alert('Please log in to send data');
   }
-
 });
 
-// document.getElementById('viewData').addEventListener('click', function() {
-//   alert('Sorry! currently we are working on dashboard, in the next version you will be use it');
-// });
 
 const annotate = (subjectiveState) => {
   checkLocalStorage();
@@ -591,6 +605,10 @@ document.getElementById('getWatchConnect').addEventListener('click', function() 
     console.log('geting stream from watch');
     bangleArray =[];
     connection.write(`\x03\x10if(1){${getBangleData}}\n`);
+    if(messageFlag) {
+      alert('received watch data');
+      messageFlag =false;
+    }
   } else {
     document.querySelector('#bt').classList.add('btdisconnected');
   }
