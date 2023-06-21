@@ -206,27 +206,25 @@ const checkLocalStorage = () => {
 // When we get a line of data from bangle, check it and update it to stream in localStorageObject
 let savingDataFlag = false;
 const btOnline = (lines) => {
-  // const d = lines.split('\n');
   checkLocalStorage();
-
+  let data = 0;
   for (const line of lines.split('\n')) {
     if (line.match('<data>')) {
       savingDataFlag = true;
+      data+=1;
     } else if (line.match('</data>')) {
-      //localStorage.setItem('bangleArray', JSON.stringify(bangleArray));
-      localStorageObject.stream.push(bangleArray);
-      //localStorageObject.stream.concat(bangleArray);
-      //localStorage.setItem('bangle', JSON.stringify(bangleArray));
-      localStorage.bangle = JSON.stringify(localStorageObject);
-      //bangleArray.push(line);
       savingDataFlag = false;
     } else if (savingDataFlag) {
       const cols = line.split(',');
       if (cols.length === 14) {
-        bangleArray.push(cols.map((val) => Number(val)));
+        localStorageObject.stream.push(cols.map((val) => Number(val)));
+        messageFlag = true;
       }
     }
   }
+  localStorage.bangle = JSON.stringify(localStorageObject);
+
+  return data;
 };
 
 const connectURL = 'https://connect-project.io';
