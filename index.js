@@ -182,9 +182,9 @@ let messageFlag = false;
 document.getElementById('get-send-delete').addEventListener('click', function() {
 
   bangleArray =[];
-  if(connection) { //only get bangle data if connected
-    connection.write(`\x03\x10if(1){${getBangleData}}\n`);
-  }
+  // if(connection) { //only get bangle data if connected
+  //   connection.write(`\x03\x10if(1){${getBangleData}}\n`);
+  // }
 });
 
 // Get localStorage data if any, or initialize the localStorageObject
