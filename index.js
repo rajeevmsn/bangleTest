@@ -72,7 +72,9 @@ Bangle.on('HRM-raw', function(hrm) {
     }
     else {
       var mem = require("Storage").getFree();
-      g.drawString("MemoryFull",50, 50);
+      if(mem > 650000){
+        g.drawString("MemoryFull",50, 50);
+      }
     }
     timePast = Date.now();}
 }); // 10 times a second
@@ -178,6 +180,7 @@ while (array != undefined) {
 //Removing Data
 g.clear();
 getBangle.erase();
+var mem = require("Storage").getFree();
 var allData = require("Storage").open("connectRawData.csv", "w");
 flag=1;
 `;
@@ -586,9 +589,10 @@ document.getElementById('btConnect').addEventListener('click', function() {
     // First, reset the Bangle
     connection.write('reset();\n', function() {
       // Wait for it to reset itself
-      connection.write(`\x03\x10if(1){setTime(${Date.now()}/1000);`);
       setTimeout(function() {
         // Now upload our code to it
+        const ts=Date.now()/1000;
+        connection.write('\x03\x10if(1){setTime('+ts+');}\n');
         //connection.write('\x03\x10if(1){'+bangleHRM+bangleGestureData+'}\n',
         connection.write('\x03\x10if(1){'+bangleRawData+'}\n',
           function() {
