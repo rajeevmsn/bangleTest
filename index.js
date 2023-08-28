@@ -65,15 +65,18 @@ Bangle.on('HRM-raw', function(hrm) {
   var line = [Math.floor(Date.now()),a.x,a.y,a.z,c.x,c.y,c.z,c.dx,c.dy,c.dz,hrm.raw,hrm.filt,hrm.bpm,hrm.confidence].map((o)=>parseInt(o*1000)/1000).join(",")+"\\n";
   mem = mem - line.length;
   if(Date.now()-timePast>100 & flag>0){
-    if(mem > 650000){
-      g.clear();
+    if(mem > 550000){
       //1000000 Bytes = 1 MB (in decimal)
       allData.write(line);
     }
     else {
       var mem = require("Storage").getFree();
-      if(mem > 650000){
+      if(mem < 650000){
         g.drawString("MemoryFull",50, 50);
+      }
+      else
+      {
+        g.clear();
       }
     }
     timePast = Date.now();}
