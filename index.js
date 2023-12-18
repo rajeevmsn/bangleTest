@@ -289,8 +289,11 @@ const sendEvents = async (eventsArray) => {
 
   const events = eventsArray.map((a) => ({
     timeStamp: a[0],
-    userAnnotation: a[1]
+    userAnnotation: a[1],
+    confidence: a[2],
+    activity: a[3]
   }));
+
 
   if (eventsArray.length > 0) {
     data.events = events;
@@ -462,30 +465,33 @@ const previousData = () => {
 
 const oldannotate = (subjectiveState) => {
   checkLocalStorage();
-  const annotateArray = [Date.parse(subjectiveState[1]), subjectiveState[0]];
+  //const annotateArray = [Date.parse(subjectiveState[1]), subjectiveState[0]];
+  const annotateArray = [subjectiveState[0], subjectiveState[1], subjectiveState[2], subjectiveState[3]];
   localStorageObject.events.push(annotateArray);
+  console.log(annotateArray);
   localStorage.bangle = JSON.stringify(localStorageObject);
   alert('old annotation recorded');
 };
 
-const form=document.querySelector('form');
-form.addEventListener('submit', (event) => {
-  const data = new FormData(form);
-  const output = [];
-  let i =0;
-  for (const entry of data) {
-    output[i] = `${entry[1]}`;
-    i += 1;
+document.querySelector('.oldData form').addEventListener('submit', function(event) {
+  event.preventDefault(); // prevent the form from being submitted normally
+
+  const subjectiveState = document.querySelector('input[name="subjectiveState"]:checked').value;
+  let activity = document.getElementById('activity').value;
+  const activitySliderValue = Number(document.getElementById('activitySlider').value);
+
+  const stateTime = Date.parse(document.getElementById('stateTime').value);
+
+  // If no text is entered in the activity field, set it to "default"
+  if (!activity) {
+    activity = 'default';
   }
+  const output = [stateTime, subjectiveState, activitySliderValue, activity];
   oldannotate(output);
   event.preventDefault();
   document.querySelector('#home').classList.remove('enterPreviousData');
   document.querySelector('#home').classList.add('sendPreviousData');
-},
-
-false
-);
-
+});
 
 const connect = () => {
   hello('connect').login()
