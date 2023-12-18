@@ -51,7 +51,7 @@
                             <legend>Envoyer les données</legend>
                             <div>
                                 <input type="radio" id="stateChoice1" name="subjectiveState" value="calm" />
-                                <label for="stateChoice1">Calme</label>
+                                <label for="stateChoice1">Calme </label>
 
                                 <!-- <input type="radio" id="stateChoice2" name="subjectiveState" value="angry" />
                                 <label for="stateChoice2">Angry</label> -->
@@ -63,9 +63,23 @@
                                 <label for="stateChoice4">Happy</label> -->
                             </div>
                             <div>
-                                <label for="eventTime">Sélectionner la date et l'heure</label>
-                                <input id="stateTime" type="datetime-local" name="previousTime" required/>
+                                <label for="activity">Activity</label>
+                                <input id = "activity" type = "text" name="activity" maxlength = "30" placeholder="activity">
 
+                                <input id="activitySlider" type="range" min="1" max="5" step="1" value="3">
+                                <span>Confidence: </span><span id="activityValue">3</span>
+                                <script>
+                                    const activitySlider = document.getElementById("activitySlider");
+                                    const activityValue = document.getElementById("activityValue");
+
+                                    activitySlider.addEventListener("input", function() {
+                                        activityValue.textContent = activitySlider.value;
+                                    });
+                                </script>
+                            </div>
+                            <div>
+                                <label for="stateTime">Sélectionner la date et l'heure</label>
+                                <input id="stateTime" type="datetime-local" name="previousTime" required />
                                 <button type="submit">Submit</button>
                             </div>
                         </fieldset>
