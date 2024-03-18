@@ -35,6 +35,7 @@ Bangle.on('gesture',gotGesture);
 `;
 //Writng sensor data (acceleromter and magnetometer for now) in the csv file in bangle local memory
 const bangleRawData =`
+g.setBgColor(0,0,0);
 g.clear();
 g.setFont("Vector:30").setFontAlign(0,0);
 Bangle.loadWidgets();
@@ -76,6 +77,7 @@ Bangle.on('HRM-raw', function(hrm) {
       }
       else
       {
+        g.setBgColor(0,0,0);
         g.clear();
       }
     }
@@ -84,8 +86,6 @@ Bangle.on('HRM-raw', function(hrm) {
 `;
 
 const bangleProcessedData = `
-var img = require("heatshrink").decompress(atob("slkwhC/AH4A/AH4A/AH4A/AH4A/AH4A/AH4A2iIABF9kBGAQzsGAUikcikIypGAMSmYADmURiDDnGAoABmgymMQIwGAAKYBMUsjGJEzMkkBSY4ADmJkjiMTGJRkBGMYwLZIKWhShiWCGMSUMmcyS0MRkYxMZETGNAANBGOD6hfBr6igIx/GM8ykUiAoQEBkYxmiIABoQxDG4IJCkaV/GCURGKBnBGLgeBGISNBSgaWCkIHCGIRlbSYMxGIInCkUTLoYKBmURAoQzBGLcTEwUf//y/8xGIf/mQJBfII8BGMES//z/8SmUjGIM/A4PxAoIxeoYxCmMvMQMTGIQ6DBoRjiZAL+CGIb0CNIQxjAAYxDAAhuCGLkSGKUxiAxagERmQxRkIxdiQxQiSUbSwT0CGJ0RMThkCiIxQGDpkCGJzFdMggxOSj4xCFQ0TGI4wfSwIqHNYwxiiQxMmKUgZBD4oZBLGnZBEiSgsRMcUBSwsiHAkRSsYxBMgpiEiSWjiIABYpLTBSz5gBF4URLIJiGHYUhGTowDSYIkBS4syBgJjBGTxdFdwMRoYwEiUhHQZpBMTa9FK4USkQDBA4MxGIMxB4RlYQgkziZbBRQYABN4UxAYIxCMgIyWYgSLDkYmCAwVEHoZuCB4MzkTLWMIpTCRQQAIGIwyCMKb1EGITuEAA0hF4INBGIQ6BMiJhFAAIeBBI4/EF4IxFZYIyPgJhBkIjEA4IxLPAQxBDAj9QgIYBmSNEAgKeGMQgnBe4ZCEZR5YDJYMyDwMTmQlBZA4KBiYxBmI2DMohkNEocxkYbBiUTXQJNBS4o7CUQQwCIQoOBSppHDDYQcBdgQ4COQYGBAoMhB4IxGkTJPXoYxEWoYsCAAYJDUoYxDCQhkOKAQcDKAgmDaYIHDJAIxENIJgNS4yADEAT3GdogNCI4RoCGCKXEDYgyKFgIVBfQYYCGCRkCPgKZBmJMBYAiaFBgMBCgMykY5CACiXCQ4R+CMwUSkUiAoQLCb4bETS4wdBJoosCAAYUGHIgyYDiQ6HGSxNZAH4A/AH4A/AH4A/AH4A/AH4A/AH4A/AFIA="));
-
 event = "connectAllData";
 Bangle.setCompassPower(1);
 
@@ -164,27 +164,32 @@ if (buffer.data.length === 0) {
 g.clear(1);
 Bangle.loadWidgets();
 Bangle.drawWidgets();
-g.drawImage(img, 50,50);
 `;
 
 const getBangleData = `
 //getting Data
 flag =0;
-const getBangle = require('Storage').open('connectRawData.csv', 'r');
+const getBangle = require('Storage').open('connectAllData.csv','r');
 var array = getBangle.readLine();
-g.clear();
 g.setFont("Vector:30").setFontAlign(0,0);
 g.drawString("Sending",50, 50);
+g.setBgColor(0,1,0);
+g.clear();
 while (array != undefined) {
   Bluetooth.println("<data>\\n"+array+"\\n</data>");
   array = getBangle.readLine();
-  g.drawString("Sending",50, 50);
 }
 //Removing Data
+g.setBgColor(0,0,0);
 g.clear();
-getBangle.erase();
+//getBangle.erase('connectAllData.csv\\1');
+const removeBangle = require('Storage').read('connectAllData.csv','a');
+//removeBangle.erase('connectAllData.csv\\1');
+require("Storage").erase('connectAllData.csv\\1');
+//require("Storage").eraseAll();
 var mem = require("Storage").getFree();
-var allData = require("Storage").open("connectRawData.csv", "w");
+print(mem);
+var allData = require("Storage").open("connectAllData.csv", "w");
 flag=1;
 `;
 
@@ -223,11 +228,12 @@ const btOnline = (lines) => {
     if (line.match('<data>')) {
       savingDataFlag = true;
       data+=1;
+      //alert('receiving watch data...');
     } else if (line.match('</data>')) {
       savingDataFlag = false;
     } else if (savingDataFlag) {
       const cols = line.split(',');
-      if (cols.length === 14) {
+      if (cols.length === 28) {
         localStorageObject.stream.push(cols.map((val) => Number(val)));
         messageFlag = true;
       }
@@ -298,6 +304,7 @@ const sendEvents = async (eventsArray) => {
   if (eventsArray.length > 0) {
     data.events = events;
     const jsonData = JSON.stringify(data);
+    console.log(jsonData);
 
     try {
       const responseA = await fetch(url, {
@@ -337,11 +344,16 @@ const sendStream = async (stream) => {
     for (let l = 0; l < batchStream.length; l++) {
       const a = batchStream[l].map(Number);
       bangleStream[l] = {
-        bufferStart: a[0],
         // eslint-disable-next-line camelcase, object-property-newline
-        ax_M: a[1], ay_M: a[2], az_M: a[3], cx_M: a[4], cy_M: a[5], cz_M: a[6], cdx_M: a[7], cdy_M: a[8], cdz_M: a[9],
+        bufferStart: a[0], bufferStop: a[1],
         // eslint-disable-next-line camelcase, object-property-newline
-        hrmRaw_M: a[10], hrmFilt_M: a[11], hrmBPM_M: a[12], hrmConfidence_M: a[13]
+        ax_M: a[2], ay_M: a[3], az_M: a[4], cx_M: a[5], cy_M: a[6], cz_M: a[7], cdx_M: a[8], cdy_M: a[9], cdz_M: a[10],
+        // eslint-disable-next-line camelcase, object-property-newline
+        hrmRaw_M: a[11], hrmFilt_M: a[12], hrmBPM_M: a[13], hrmConfidence_M: a[14],
+        // eslint-disable-next-line camelcase, object-property-newline
+        ax_S: a[15], ay_S: a[16], az_S: a[17], cx_S: a[18], cy_S: a[19], cz_S: a[20], cdx_S: a[21], cdy_S: a[22], cdz_S: a[23],
+        // eslint-disable-next-line camelcase, object-property-newline
+        hrmRaw_S: a[24], hrmFilt_S: a[25], hrmBPM_S: a[26], hrmConfidence_S: a[27]
       };
     }
 
@@ -352,7 +364,7 @@ const sendStream = async (stream) => {
       };
 
       const sendRequest = new XMLHttpRequest();
-      sendRequest.open('POST', `${connectURL}/parse/classes/bangleStream`);
+      sendRequest.open('POST', `${connectURL}/parse/classes/bangleStream28`);
       sendRequest.setRequestHeader('Content-Type', 'application/json');
       sendRequest.setRequestHeader('X-Parse-Application-Id', 'connect');
       sendRequest.setRequestHeader('Authorization', `Bearer ${accessToken}`);
@@ -603,7 +615,7 @@ document.getElementById('btConnect').addEventListener('click', function() {
         const ts=Date.now()/1000;
         connection.write('\x03\x10if(1){setTime('+ts+');}\n');
         //connection.write('\x03\x10if(1){'+bangleHRM+bangleGestureData+'}\n',
-        connection.write('\x03\x10if(1){'+bangleRawData+'}\n',
+        connection.write('\x03\x10if(1){'+bangleProcessedData+'}\n',
           function() {
             document.querySelector('#bt').classList.add('btconnected');
             alert('watch connected');

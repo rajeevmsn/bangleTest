@@ -1,14 +1,16 @@
 * {
     font-family: sans-serif;
     font-size: calc(.5em + 1vw);
+    margin: 0;
+    padding: 0;
 }
 
 html,
 .fullscreen{
     display: flex;
     height: 100%;
-    margin: 0;
-    padding: 0;
+    /* margin: 0;
+    padding: 0; */
     width: 100%;
 }
 
@@ -19,13 +21,9 @@ html,
 
 .oldData{
     position: absolute;
-    top: 80%
+    top: 70%
 }
   
-#header>* {
-    float: right;
-}
-
 /* #content,
 #logo,
 #message {
@@ -53,7 +51,7 @@ html,
 } */
 button {
     
-    width: 20%;
+    width: 25%;
     height: 50px;
     background: #89c;
     border: thin solid #999;
@@ -75,6 +73,11 @@ legend {
     border: 0;
     font-size: 14px;
   }
+
+/* Header */
+#header>* {
+    float: right;
+}
 
 /*Swap between home and help */
 #message.home > #home {
@@ -164,7 +167,7 @@ legend {
     top: 15%;
     left: 5%;
     width: 90%;
-    height: 40%;
+    height: 35%;
     border-radius: 48px;
     background: rgb(226, 225, 225); 
 }
@@ -194,35 +197,36 @@ legend {
 }
 .button6a{
     position:absolute;
-    top: 65%;
+    top: 55%;
     left: 5%;
     width: 25%;
 }
 .button6b{
     position:absolute;
-    top: 65%;
+    top: 55%;
     left: 37.5%;
     width: 25%;
 }
 .button6c{
     position:absolute;
-    top: 65%;
+    top: 55%;
     right:5%;
     width: 25%;
 }
 .button7{
     position: absolute;
-    top: 75%;
+    top: 70%;
     left: 5%;
     width: 90%;
 }
 .oldData{
     position: absolute;
-    top: 75%;
+    top: 70%;
     left: 5%;
     width: 90%;
-    height: 20%;
+    height: 25%;
     font-size: calc(.25em + .5vw);
+    /* font-size: calc(.5em + 1vw); */
 }
 .button8{
     top: 5%;
@@ -230,3 +234,40 @@ legend {
     height: 48px;
     width: 48px;
 }
+/* Custom styles for index.html */
+body {
+    background-color: #f2f2f2;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+p {
+    font-size: 1.2rem;
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #89c;
+    color: white;
+    font-size: 1rem;
+    border-radius: 5px;
+    text-decoration: none;
+    margin-right: 10px;
+}
+
+.button:hover {
+    background-color: #67a;
+}
+
