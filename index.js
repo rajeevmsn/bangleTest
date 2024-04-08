@@ -161,7 +161,8 @@ if (buffer.data.length === 0) {
     buffer.data = []; //Empty data
   }
 });
-g.clear(1);
+g.setBgColor(0,0,0);
+g.clear();
 Bangle.loadWidgets();
 Bangle.drawWidgets();
 `;
@@ -179,7 +180,6 @@ while (array != undefined) {
   Bluetooth.println("<data>\\n"+array+"\\n</data>");
   array = getBangle.readLine();
 }
-//Removing Data
 g.setBgColor(0,0,0);
 g.clear();
 //getBangle.erase('connectAllData.csv\\1');
