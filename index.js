@@ -169,26 +169,28 @@ Bangle.drawWidgets();
 
 const getBangleData = `
 //getting Data
+g.setBgColor(1,1,1);
+g.clear();
+Bangle.buzz(200,1);
 flag =0;
 const getBangle = require('Storage').open('connectAllData.csv','r');
 var array = getBangle.readLine();
-g.setFont("Vector:30").setFontAlign(0,0);
-g.drawString("Sending",50, 50);
-g.setBgColor(0,1,0);
-g.clear();
+
 while (array != undefined) {
   Bluetooth.println("<data>\\n"+array+"\\n</data>");
   array = getBangle.readLine();
 }
-g.setBgColor(0,0,0);
-g.clear();
+
 //getBangle.erase('connectAllData.csv\\1');
 const removeBangle = require('Storage').read('connectAllData.csv','a');
 //removeBangle.erase('connectAllData.csv\\1');
 require("Storage").erase('connectAllData.csv\\1');
+g.setBgColor(0,1,1);
+g.clear();
 //require("Storage").eraseAll();
 var mem = require("Storage").getFree();
-print(mem);
+Bangle.buzz(200,1);
+g.clear();
 var allData = require("Storage").open("connectAllData.csv", "w");
 flag=1;
 `;
